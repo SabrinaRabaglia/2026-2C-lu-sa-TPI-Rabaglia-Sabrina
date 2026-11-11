@@ -1,0 +1,68 @@
+ai-ticket-it/
+│
+├── backend/
+│   │
+│   ├── src/
+│   │   ├── config/
+│   │   │
+│   │   ├── controllers/
+│   │   │
+│   │   ├── services/
+│   │   │
+│   │   ├── repositories/
+│   │   │
+│   │   ├── routes/
+│   │   │
+│   │   ├── models/
+│   │   │
+│   │   ├── middlewares/
+│   │   │
+│   │   ├── validators/
+│   │   │
+│   │   ├── data/
+│   │   │
+│   │   └── app.js
+│   │
+│   ├── tests/
+│   │
+│   ├── .env
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── package.json
+│   ├── package-lock.json
+│   └── server.js
+│
+├── frontend/
+│   │
+│   ├── assets/
+│   │
+│   ├── src/
+│   │   ├── components/
+│   │   │
+│   │   ├── screens/
+│   │   │
+│   │   ├── navigation/
+│   │   │
+│   │   ├── services/
+│   │   │
+│   │   ├── hooks/
+│   │   │
+│   │   ├── context/
+│   │   │
+│   │   ├── constants/
+│   │   │
+│   │   └── utils/
+│   │
+│   ├── App.js
+│   ├── app.json
+│   ├── package.json
+│   └── package-lock.json
+│
+├── docs/
+│   ├── modelo-dominio.md
+│   ├── arquitectura.md
+│   ├── endpoints.md
+│   └── decisiones-tecnicas.md
+│
+├── .gitignore
+└── README.md

@@ -154,4 +154,39 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         const usuarioActualizado = await resDel.json();
         assert.equal(usuarioActualizado.favoritos.length, 0);
     });
+
+    it("Middleware de validación y errorHandler: deben atrapar errores de entrada (400), no encontrados (404) y conflictos de dominio (409)", async () => {
+        // 1. Validación temprana de request (Zod -> RequestValidationError -> 400)
+        const resBadInput = await fetch(`${baseUrl}/categorias`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({})
+        });
+        assert.equal(resBadInput.status, 400);
+        const badBody = await resBadInput.json();
+        assert.equal(badBody.tipo, "RequestValidationError");
+
+        // 2. Entidad no encontrada (ServiceError -> EntidadNoEncontradaError -> 404)
+        const resNotFound = await fetch(`${baseUrl}/eventos/id-inexistente`);
+        assert.equal(resNotFound.status, 404);
+        const notFoundBody = await resNotFound.json();
+        assert.equal(notFoundBody.tipo, "EntidadNoEncontradaError");
+
+        // 3. Regla de dominio: reseñar compra no utilizada (DomainError -> CompraNoReseniableError -> 409)
+        const [, , compLucia] = seedData.usuarios;
+        const [compraConfirmada] = seedData.compras;
+        const resDomainErr = await fetch(`${baseUrl}/resenias`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                compraId: compraConfirmada.id,
+                compradorId: compLucia.id,
+                puntuacion: 5,
+                detalle: "Aún no utilizada"
+            })
+        });
+        assert.equal(resDomainErr.status, 409);
+        const domainErrBody = await resDomainErr.json();
+        assert.equal(domainErrBody.tipo, "CompraNoReseniableError");
+    });
 });

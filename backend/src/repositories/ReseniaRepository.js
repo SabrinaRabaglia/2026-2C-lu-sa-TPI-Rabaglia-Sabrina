@@ -21,15 +21,6 @@ export class ReseniaRepository {
         return this.resenias.filter((r) => r.evento?.organizador?.id === organizadorId);
     }
 
-    calcularPromedioOrganizador(organizadorId) {
-        const reseniasOrg = this.findByOrganizadorId(organizadorId);
-        if (reseniasOrg.length === 0) {
-            return 0;
-        }
-        const suma = reseniasOrg.reduce((acc, r) => acc + r.puntuacion, 0);
-        return Number((suma / reseniasOrg.length).toFixed(2));
-    }
-
     save(resenia) {
         if (!resenia) {
             throw new Error("Se debe proporcionar una reseña válida");

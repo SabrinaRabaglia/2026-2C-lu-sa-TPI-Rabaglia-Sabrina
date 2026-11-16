@@ -11,6 +11,11 @@ import {
     mensajeRepository as defaultMensajeRepo,
     cambioEstadoCompraRepository as defaultCambioEstadoRepo
 } from "../repositories/index.js";
+import {
+    EntidadNoEncontradaError,
+    OperacionNoAutorizadaError,
+    TipoEntradaNoPerteneceAlEventoError
+} from "./errors.js";
 
 export class CompraService {
     constructor({
@@ -51,9 +56,7 @@ export class CompraService {
     obtenerCompraPorId(compraId, fechaReferencia = new Date()) {
         const compra = this.compraRepository.findById(compraId);
         if (!compra) {
-            const error = new Error(`Compra con id "${compraId}" no encontrada`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Compra", compraId);
         }
         return this.enriquecerCompra(compra, fechaReferencia);
     }
@@ -73,9 +76,7 @@ export class CompraService {
     obtenerMensajesPorCompra(compraId) {
         const compra = this.compraRepository.findById(compraId);
         if (!compra) {
-            const error = new Error(`Compra con id "${compraId}" no encontrada`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Compra", compraId);
         }
         return [...compra.mensajes];
     }
@@ -83,9 +84,7 @@ export class CompraService {
     obtenerComprasPorComprador(compradorId, fechaReferencia = new Date()) {
         const comprador = this.usuarioRepository.findById(compradorId);
         if (!comprador) {
-            const error = new Error(`Comprador con id "${compradorId}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Comprador", compradorId);
         }
         const compras = this.compraRepository.findByCompradorId(compradorId);
         return compras.map((c) => this.enriquecerCompra(c, fechaReferencia));
@@ -94,15 +93,11 @@ export class CompraService {
     obtenerComprasPorEvento(eventoId, organizadorId = null, fechaReferencia = new Date()) {
         const evento = this.eventoRepository.findById(eventoId);
         if (!evento) {
-            const error = new Error(`Evento con id "${eventoId}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Evento", eventoId);
         }
 
         if (organizadorId && evento.organizador?.id !== organizadorId) {
-            const error = new Error("El usuario indicado no es el organizador de este evento");
-            error.statusCode = 403;
-            throw error;
+            throw new OperacionNoAutorizadaError("El usuario indicado no es el organizador de este evento");
         }
 
         const compras = this.compraRepository
@@ -141,25 +136,17 @@ export class CompraService {
     }) {
         const comprador = this.usuarioRepository.findById(compradorId);
         if (!comprador) {
-            const error = new Error(`Comprador con id "${compradorId}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Comprador", compradorId);
         }
 
         const evento = this.eventoRepository.findById(eventoId);
         if (!evento) {
-            const error = new Error(`Evento con id "${eventoId}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Evento", eventoId);
         }
 
         const tipoEntrada = evento.tiposEntrada.find((t) => t.id === tipoEntradaId);
         if (!tipoEntrada) {
-            const error = new Error(
-                `El tipo de entrada "${tipoEntradaId}" no pertenece al evento "${evento.nombre}"`
-            );
-            error.statusCode = 400;
-            throw error;
+            throw new TipoEntradaNoPerteneceAlEventoError(tipoEntradaId, evento.nombre);
         }
 
         const cantidadNum = Number(cantidad);
@@ -194,18 +181,14 @@ export class CompraService {
 
         const compra = this.compraRepository.findById(compraId);
         if (!compra) {
-            const error = new Error(`Compra con id "${compraId}" no encontrada`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Compra", compraId);
         }
 
         let responsable = compra.evento?.organizador || compra.comprador;
         if (usuarioId) {
             const usuario = this.usuarioRepository.findById(usuarioId);
             if (!usuario) {
-                const error = new Error(`Usuario con id "${usuarioId}" no encontrado`);
-                error.statusCode = 404;
-                throw error;
+                throw new EntidadNoEncontradaError("Usuario", usuarioId);
             }
             responsable = usuario;
         }
@@ -227,18 +210,14 @@ export class CompraService {
     cancelarCompra({ compraId, usuarioId = null, fechaReferencia = new Date() }) {
         const compra = this.compraRepository.findById(compraId);
         if (!compra) {
-            const error = new Error(`Compra con id "${compraId}" no encontrada`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Compra", compraId);
         }
 
         let responsable = compra.comprador;
         if (usuarioId) {
             const usuario = this.usuarioRepository.findById(usuarioId);
             if (!usuario) {
-                const error = new Error(`Usuario con id "${usuarioId}" no encontrado`);
-                error.statusCode = 404;
-                throw error;
+                throw new EntidadNoEncontradaError("Usuario", usuarioId);
             }
             responsable = usuario;
         }
@@ -261,16 +240,12 @@ export class CompraService {
     enviarMensaje({ compraId, usuarioId, mensaje, fecha = new Date() }) {
         const compra = this.compraRepository.findById(compraId);
         if (!compra) {
-            const error = new Error(`Compra con id "${compraId}" no encontrada`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Compra", compraId);
         }
 
         const usuario = this.usuarioRepository.findById(usuarioId);
         if (!usuario) {
-            const error = new Error(`Usuario con id "${usuarioId}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Usuario", usuarioId);
         }
 
         const nuevoMensaje = compra.agregarMensaje(usuario, mensaje, fecha);

@@ -11,12 +11,13 @@ export {
     CompraService,
     ReseniaService
 };
+export * from "./errors.js";
 
 export const categoriaService = new CategoriaService();
 export const usuarioService = new UsuarioService();
-export const eventoService = new EventoService();
+export const eventoService = new EventoService({ usuarioService });
 export const compraService = new CompraService();
-export const reseniaService = new ReseniaService();
+export const reseniaService = new ReseniaService({ usuarioService });
 
 export const services = {
     categoriaService,

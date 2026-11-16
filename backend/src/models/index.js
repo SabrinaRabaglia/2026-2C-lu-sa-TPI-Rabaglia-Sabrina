@@ -7,3 +7,4 @@ export { Mensaje } from "./Mensaje.js";
 export { CambioEstadoCompra } from "./CambioEstadoCompra.js";
 export { Compra } from "./Compra.js";
 export { Resenia } from "./Resenia.js";
+export * from "./errors.js";

@@ -1,5 +1,9 @@
 import { Categoria } from "../models/index.js";
 import { categoriaRepository as defaultCategoriaRepo } from "../repositories/index.js";
+import {
+    EntidadNoEncontradaError,
+    ConflictoEntidadError
+} from "./errors.js";
 
 export class CategoriaService {
     constructor({ categoriaRepository = defaultCategoriaRepo } = {}) {
@@ -13,9 +17,7 @@ export class CategoriaService {
     obtenerCategoriaPorId(id) {
         const categoria = this.categoriaRepository.findById(id);
         if (!categoria) {
-            const error = new Error(`Categoría con id "${id}" no encontrada`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Categoría", id);
         }
         return categoria;
     }
@@ -23,9 +25,7 @@ export class CategoriaService {
     crearCategoria({ nombre, descripcion = "" }) {
         const existente = this.categoriaRepository.findByNombre(nombre);
         if (existente) {
-            const error = new Error(`Ya existe una categoría con el nombre "${nombre}"`);
-            error.statusCode = 409;
-            throw error;
+            throw new ConflictoEntidadError(`Ya existe una categoría con el nombre "${nombre}"`);
         }
         const nuevaCategoria = new Categoria({ nombre, descripcion });
         return this.categoriaRepository.save(nuevaCategoria);

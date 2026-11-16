@@ -1,6 +1,6 @@
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { EstadoCompra } from "../src/models/index.js";
+import { EstadoCompra, CompraNoReseniableError } from "../src/models/index.js";
 import { repositories } from "../src/repositories/index.js";
 import { seedDatabase } from "../src/data/seed.js";
 import {
@@ -8,7 +8,8 @@ import {
     usuarioService,
     eventoService,
     compraService,
-    reseniaService
+    reseniaService,
+    ConflictoEntidadError
 } from "../src/services/index.js";
 
 describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () => {
@@ -131,7 +132,7 @@ describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () 
                     puntuacion: 5,
                     detalle: "Todavía no fui"
                 }),
-            /UTILIZADA/
+            CompraNoReseniableError
         );
 
         const nuevaResenia = reseniaService.crearResenia({
@@ -145,9 +146,11 @@ describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () 
         assert.equal(nuevaResenia.puntuacion, 5);
     });
 
-    it("UsuarioService y CategoriaService: deben gestionar favoritos y categorías correctamente", () => {
-        const [, , , compMateo] = seedData.usuarios;
+    it("UsuarioService y CategoriaService: deben calcular el promedio de reseñas del organizador y gestionar favoritos y categorías", () => {
+        const [orgRock, , , compMateo] = seedData.usuarios;
         const [evFestivalRock] = seedData.eventos;
+
+        assert.equal(usuarioService.calcularPromedioOrganizador(orgRock.id), 4.5);
 
         usuarioService.agregarFavorito(compMateo.id, evFestivalRock.id);
         assert.equal(usuarioService.obtenerFavoritos(compMateo.id).length, 1);
@@ -162,7 +165,7 @@ describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () 
         assert.ok(nuevaCat.id);
         assert.throws(
             () => categoriaService.crearCategoria({ nombre: "feria gastronómica" }),
-            /Ya existe una categoría/
+            ConflictoEntidadError
         );
     });
 });

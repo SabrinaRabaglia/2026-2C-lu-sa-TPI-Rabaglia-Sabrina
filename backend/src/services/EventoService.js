@@ -6,6 +6,11 @@ import {
     tipoEntradaRepository as defaultTipoEntradaRepo,
     reseniaRepository as defaultReseniaRepo
 } from "../repositories/index.js";
+import { UsuarioService } from "./UsuarioService.js";
+import {
+    EntidadNoEncontradaError,
+    EventoSinTiposEntradaError
+} from "./errors.js";
 
 export class EventoService {
     constructor({
@@ -13,13 +18,21 @@ export class EventoService {
         categoriaRepository = defaultCategoriaRepo,
         usuarioRepository = defaultUsuarioRepo,
         tipoEntradaRepository = defaultTipoEntradaRepo,
-        reseniaRepository = defaultReseniaRepo
+        reseniaRepository = defaultReseniaRepo,
+        usuarioService = null
     } = {}) {
         this.eventoRepository = eventoRepository;
         this.categoriaRepository = categoriaRepository;
         this.usuarioRepository = usuarioRepository;
         this.tipoEntradaRepository = tipoEntradaRepository;
         this.reseniaRepository = reseniaRepository;
+        this.usuarioService =
+            usuarioService ||
+            new UsuarioService({
+                usuarioRepository,
+                eventoRepository,
+                reseniaRepository
+            });
     }
 
     enriquecerEvento(evento) {
@@ -28,7 +41,7 @@ export class EventoService {
             ? this.reseniaRepository.findByOrganizadorId(organizadorId)
             : [];
         const puntajeOrganizador = organizadorId
-            ? this.reseniaRepository.calcularPromedioOrganizador(organizadorId)
+            ? this.usuarioService.calcularPromedioOrganizador(organizadorId)
             : 0;
 
         return {
@@ -50,9 +63,7 @@ export class EventoService {
     obtenerEventoPorId(eventoId) {
         const evento = this.eventoRepository.findById(eventoId);
         if (!evento) {
-            const error = new Error(`Evento con id "${eventoId}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Evento", eventoId);
         }
         return this.enriquecerEvento(evento);
     }
@@ -109,9 +120,7 @@ export class EventoService {
     listarEventosPorOrganizador(organizadorId) {
         const organizador = this.usuarioRepository.findById(organizadorId);
         if (!organizador) {
-            const error = new Error(`Organizador con id "${organizadorId}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Organizador", organizadorId);
         }
         return this.eventoRepository
             .findByOrganizadorId(organizadorId)
@@ -129,22 +138,16 @@ export class EventoService {
     }) {
         const categoria = this.categoriaRepository.findById(categoriaId);
         if (!categoria) {
-            const error = new Error(`Categoría con id "${categoriaId}" no encontrada`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Categoría", categoriaId);
         }
 
         const organizador = this.usuarioRepository.findById(organizadorId);
         if (!organizador) {
-            const error = new Error(`Organizador con id "${organizadorId}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Organizador", organizadorId);
         }
 
         if (!Array.isArray(tiposEntrada) || tiposEntrada.length === 0) {
-            const error = new Error("El evento debe ofrecer al menos un tipo de entrada");
-            error.statusCode = 400;
-            throw error;
+            throw new EventoSinTiposEntradaError();
         }
 
         const instanciasTipos = tiposEntrada.map((t) => {

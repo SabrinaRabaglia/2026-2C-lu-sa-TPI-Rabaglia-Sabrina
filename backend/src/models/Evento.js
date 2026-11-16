@@ -1,3 +1,5 @@
+import { DatosDominioInvalidosError } from "./errors.js";
+
 export class Evento {
     constructor({
         id = null,
@@ -10,17 +12,17 @@ export class Evento {
         organizador
     }) {
         if (!nombre || typeof nombre !== "string" || !nombre.trim()) {
-            throw new Error("El nombre del evento es obligatorio");
+            throw new DatosDominioInvalidosError("El nombre del evento es obligatorio");
         }
         if (!categoria) {
-            throw new Error("La categoría del evento es obligatoria");
+            throw new DatosDominioInvalidosError("La categoría del evento es obligatoria");
         }
         const fechaParsed = fecha instanceof Date ? fecha : new Date(fecha);
         if (!fecha || Number.isNaN(fechaParsed.getTime())) {
-            throw new Error("La fecha del evento es inválida");
+            throw new DatosDominioInvalidosError("La fecha del evento es inválida");
         }
         if (!organizador) {
-            throw new Error("El organizador del evento es obligatorio");
+            throw new DatosDominioInvalidosError("El organizador del evento es obligatorio");
         }
 
         this.id = id;
@@ -63,7 +65,7 @@ export class Evento {
 
     agregarTipoEntrada(tipoEntrada) {
         if (!tipoEntrada) {
-            throw new Error("El tipo de entrada es obligatorio");
+            throw new DatosDominioInvalidosError("El tipo de entrada es obligatorio");
         }
         this.tiposEntrada.push(tipoEntrada);
     }

@@ -1,13 +1,18 @@
+import {
+    DatosDominioInvalidosError,
+    PuntuacionInvalidaError
+} from "./errors.js";
+
 export class Resenia {
     constructor({ id = null, comprador, evento, detalle = "", puntuacion }) {
         if (!comprador) {
-            throw new Error("El comprador de la reseña es obligatorio");
+            throw new DatosDominioInvalidosError("El comprador de la reseña es obligatorio");
         }
         if (!evento) {
-            throw new Error("El evento de la reseña es obligatorio");
+            throw new DatosDominioInvalidosError("El evento de la reseña es obligatorio");
         }
-        if (typeof puntuacion !== "number" || puntuacion < 1 || puntuacion > 5) {
-            throw new Error("La puntuación debe ser un número entre 1 y 5");
+        if (typeof puntuacion !== "number" || Number.isNaN(puntuacion) || puntuacion < 1 || puntuacion > 5) {
+            throw new PuntuacionInvalidaError("La puntuación debe ser un número entre 1 y 5");
         }
 
         this.id = id;

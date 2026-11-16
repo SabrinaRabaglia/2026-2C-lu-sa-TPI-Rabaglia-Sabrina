@@ -1,5 +1,11 @@
 import { EstadoCompra } from "./EstadoCompra.js";
 import { Mensaje } from "./Mensaje.js";
+import {
+    DatosDominioInvalidosError,
+    EstadoCompraInvalidoError,
+    CancelacionCompraInvalidaError,
+    UsuarioNoParticipanteDelChatError
+} from "./errors.js";
 
 export class Compra {
     constructor({
@@ -13,19 +19,19 @@ export class Compra {
         mensajes = []
     }) {
         if (!comprador) {
-            throw new Error("El comprador es obligatorio");
+            throw new DatosDominioInvalidosError("El comprador es obligatorio");
         }
         if (!evento) {
-            throw new Error("El evento es obligatorio");
+            throw new DatosDominioInvalidosError("El evento es obligatorio");
         }
         if (!tipoEntrada) {
-            throw new Error("El tipo de entrada es obligatorio");
+            throw new DatosDominioInvalidosError("El tipo de entrada es obligatorio");
         }
         if (!Number.isInteger(cantidad) || cantidad <= 0) {
-            throw new Error("La cantidad de entradas debe ser un entero mayor a 0");
+            throw new DatosDominioInvalidosError("La cantidad de entradas debe ser un entero mayor a 0");
         }
         if (!Object.values(EstadoCompra).includes(estado)) {
-            throw new Error(`El estado "${estado}" no es un EstadoCompra válido`);
+            throw new EstadoCompraInvalidoError(estado);
         }
 
         this.id = id;
@@ -40,7 +46,7 @@ export class Compra {
 
     actualizarEstado(nuevoEstado) {
         if (!Object.values(EstadoCompra).includes(nuevoEstado)) {
-            throw new Error(`El estado "${nuevoEstado}" no es un EstadoCompra válido`);
+            throw new EstadoCompraInvalidoError(nuevoEstado);
         }
         this.estado = nuevoEstado;
     }
@@ -59,9 +65,7 @@ export class Compra {
 
     cancelar(fechaReferencia = new Date(), estadoFinal = EstadoCompra.REEMBOLSADA) {
         if (!this.puedeCancelarse(fechaReferencia)) {
-            throw new Error(
-                "No se puede cancelar la compra: ya fue utilizada, ya está cancelada o el evento ya se realizó"
-            );
+            throw new CancelacionCompraInvalidaError();
         }
         this.tipoEntrada.reintegrarCupo(this.cantidad);
         this.actualizarEstado(estadoFinal);
@@ -91,7 +95,7 @@ export class Compra {
 
     agregarMensaje(usuario, texto, fecha = new Date()) {
         if (!this.esParticipanteDelChat(usuario)) {
-            throw new Error("Solo el comprador o el organizador del evento pueden enviar mensajes en esta compra");
+            throw new UsuarioNoParticipanteDelChatError();
         }
         const nuevoMensaje = new Mensaje({
             usuario,

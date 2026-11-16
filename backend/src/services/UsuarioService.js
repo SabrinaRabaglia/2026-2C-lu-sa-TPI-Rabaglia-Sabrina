@@ -1,16 +1,20 @@
 import { Usuario } from "../models/index.js";
 import {
     usuarioRepository as defaultUsuarioRepo,
-    eventoRepository as defaultEventoRepo
+    eventoRepository as defaultEventoRepo,
+    reseniaRepository as defaultReseniaRepo
 } from "../repositories/index.js";
+import { EntidadNoEncontradaError } from "./errors.js";
 
 export class UsuarioService {
     constructor({
         usuarioRepository = defaultUsuarioRepo,
-        eventoRepository = defaultEventoRepo
+        eventoRepository = defaultEventoRepo,
+        reseniaRepository = defaultReseniaRepo
     } = {}) {
         this.usuarioRepository = usuarioRepository;
         this.eventoRepository = eventoRepository;
+        this.reseniaRepository = reseniaRepository;
     }
 
     listarUsuarios() {
@@ -20,9 +24,7 @@ export class UsuarioService {
     obtenerUsuarioPorId(id) {
         const usuario = this.usuarioRepository.findById(id);
         if (!usuario) {
-            const error = new Error(`Usuario con id "${id}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Usuario", id);
         }
         return usuario;
     }
@@ -30,6 +32,28 @@ export class UsuarioService {
     crearUsuario({ nombre, apellido }) {
         const usuario = new Usuario({ nombre, apellido });
         return this.usuarioRepository.save(usuario);
+    }
+
+    calcularPromedioOrganizador(organizadorId) {
+        this.obtenerUsuarioPorId(organizadorId);
+        const resenias = this.reseniaRepository.findByOrganizadorId(organizadorId);
+        if (resenias.length === 0) {
+            return 0;
+        }
+        const suma = resenias.reduce((acc, r) => acc + r.puntuacion, 0);
+        return Number((suma / resenias.length).toFixed(2));
+    }
+
+    obtenerReputacionOrganizador(organizadorId) {
+        const organizador = this.obtenerUsuarioPorId(organizadorId);
+        const resenias = this.reseniaRepository.findByOrganizadorId(organizadorId);
+        const promedio = this.calcularPromedioOrganizador(organizadorId);
+        return {
+            organizador,
+            promedio,
+            totalResenias: resenias.length,
+            resenias
+        };
     }
 
     obtenerFavoritos(usuarioId) {
@@ -41,9 +65,7 @@ export class UsuarioService {
         const usuario = this.obtenerUsuarioPorId(usuarioId);
         const evento = this.eventoRepository.findById(eventoId);
         if (!evento) {
-            const error = new Error(`Evento con id "${eventoId}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Evento", eventoId);
         }
         usuario.agregarFavorito(evento);
         this.usuarioRepository.save(usuario);
@@ -54,9 +76,7 @@ export class UsuarioService {
         const usuario = this.obtenerUsuarioPorId(usuarioId);
         const evento = this.eventoRepository.findById(eventoId);
         if (!evento) {
-            const error = new Error(`Evento con id "${eventoId}" no encontrado`);
-            error.statusCode = 404;
-            throw error;
+            throw new EntidadNoEncontradaError("Evento", eventoId);
         }
         usuario.quitarFavorito(evento);
         this.usuarioRepository.save(usuario);

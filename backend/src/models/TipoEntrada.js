@@ -1,13 +1,18 @@
+import {
+    DatosDominioInvalidosError,
+    CupoInsuficienteError
+} from "./errors.js";
+
 export class TipoEntrada {
     constructor({ id = null, nombre, descripcion = "", precio, cupo }) {
         if (!nombre || typeof nombre !== "string" || !nombre.trim()) {
-            throw new Error("El nombre del tipo de entrada es obligatorio");
+            throw new DatosDominioInvalidosError("El nombre del tipo de entrada es obligatorio");
         }
-        if (typeof precio !== "number" || precio < 0) {
-            throw new Error("El precio debe ser un número mayor o igual a 0");
+        if (typeof precio !== "number" || Number.isNaN(precio) || precio < 0) {
+            throw new DatosDominioInvalidosError("El precio debe ser un número mayor o igual a 0");
         }
         if (!Number.isInteger(cupo) || cupo < 0) {
-            throw new Error("El cupo debe ser un número entero mayor o igual a 0");
+            throw new DatosDominioInvalidosError("El cupo debe ser un número entero mayor o igual a 0");
         }
 
         this.id = id;
@@ -23,14 +28,14 @@ export class TipoEntrada {
 
     descontarCupo(cantidad) {
         if (!this.hayCupoPara(cantidad)) {
-            throw new Error(`No hay cupo suficiente para "${this.nombre}". Disponible: ${this.cupo}, solicitado: ${cantidad}`);
+            throw new CupoInsuficienteError(this.nombre, this.cupo, cantidad);
         }
         this.cupo -= cantidad;
     }
 
     reintegrarCupo(cantidad) {
         if (!Number.isInteger(cantidad) || cantidad <= 0) {
-            throw new Error("La cantidad a reintegrar debe ser un entero positivo");
+            throw new DatosDominioInvalidosError("La cantidad a reintegrar debe ser un entero positivo");
         }
         this.cupo += cantidad;
     }

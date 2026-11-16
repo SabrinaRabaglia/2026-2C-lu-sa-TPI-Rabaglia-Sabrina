@@ -9,7 +9,11 @@ import {
     Mensaje,
     CambioEstadoCompra,
     Compra,
-    Resenia
+    Resenia,
+    CupoInsuficienteError,
+    CancelacionCompraInvalidaError,
+    UsuarioNoParticipanteDelChatError,
+    PuntuacionInvalidaError
 } from "../src/models/index.js";
 
 describe("Capa de Dominio - AI Ticket It", () => {
@@ -31,7 +35,7 @@ describe("Capa de Dominio - AI Ticket It", () => {
             entradaVip.descontarCupo(4);
             assert.equal(entradaVip.cupo, 6);
 
-            assert.throws(() => entradaVip.descontarCupo(7), /No hay cupo suficiente/);
+            assert.throws(() => entradaVip.descontarCupo(7), CupoInsuficienteError);
 
             entradaVip.reintegrarCupo(2);
             assert.equal(entradaVip.cupo, 8);
@@ -166,7 +170,7 @@ describe("Capa de Dominio - AI Ticket It", () => {
             compra.actualizarEstado(EstadoCompra.UTILIZADA);
             assert.equal(compra.puedeSerReseniada(), true);
             assert.equal(compra.puedeCancelarse(antesDelEvento), false);
-            assert.throws(() => compra.cancelar(antesDelEvento), /No se puede cancelar la compra/);
+            assert.throws(() => compra.cancelar(antesDelEvento), CancelacionCompraInvalidaError);
         });
 
         it("debe permitir intercambiar mensajes entre comprador y organizador y rechazar a terceros", () => {
@@ -181,7 +185,7 @@ describe("Capa de Dominio - AI Ticket It", () => {
 
             assert.throws(
                 () => compra.agregarMensaje(tercero, "Mensaje intruso"),
-                /Solo el comprador o el organizador/
+                UsuarioNoParticipanteDelChatError
             );
         });
     });
@@ -211,7 +215,7 @@ describe("Capa de Dominio - AI Ticket It", () => {
             assert.equal(resenia.esDelOrganizador(comprador), false);
             assert.throws(
                 () => new Resenia({ comprador, evento, detalle: "Mal rango", puntuacion: 6 }),
-                /entre 1 y 5/
+                PuntuacionInvalidaError
             );
         });
     });

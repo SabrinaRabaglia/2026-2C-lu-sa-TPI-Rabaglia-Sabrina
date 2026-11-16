@@ -158,7 +158,7 @@ describe("Capa de Repositorios en Memoria - AI Ticket It", () => {
         assert.equal(msgRepo.findByUsuarioId(comp.id).length, 1);
     });
 
-    it("debe consultar reseñas por evento y calcular promedio por organizador en ReseniaRepository", () => {
+    it("debe consultar reseñas por evento y por organizador en ReseniaRepository", () => {
         const cat = catRepo.save(new Categoria({ nombre: "Stand Up" }));
         const org = userRepo.save(new Usuario({ nombre: "Sofía", apellido: "Prod" }));
         const comp1 = userRepo.save(new Usuario({ nombre: "Juan", apellido: "A" }));
@@ -177,7 +177,6 @@ describe("Capa de Repositorios en Memoria - AI Ticket It", () => {
 
         assert.equal(reseniaRepo.findByEventoId(ev.id).length, 2);
         assert.equal(reseniaRepo.findByOrganizadorId(org.id).length, 2);
-        assert.equal(reseniaRepo.calcularPromedioOrganizador(org.id), 4.5);
     });
 
     it("debe poblar todos los repositorios correctamente mediante seedDatabase()", () => {

@@ -1,10 +1,12 @@
+import { DatosDominioInvalidosError } from "./errors.js";
+
 export class Usuario {
     constructor({ id = null, nombre, apellido, favoritos = [] }) {
         if (!nombre || typeof nombre !== "string" || !nombre.trim()) {
-            throw new Error("El nombre del usuario es obligatorio");
+            throw new DatosDominioInvalidosError("El nombre del usuario es obligatorio");
         }
         if (!apellido || typeof apellido !== "string" || !apellido.trim()) {
-            throw new Error("El apellido del usuario es obligatorio");
+            throw new DatosDominioInvalidosError("El apellido del usuario es obligatorio");
         }
 
         this.id = id;
@@ -26,7 +28,7 @@ export class Usuario {
 
     agregarFavorito(evento) {
         if (!evento) {
-            throw new Error("Se debe proporcionar un evento válido");
+            throw new DatosDominioInvalidosError("Se debe proporcionar un evento válido");
         }
         if (!this.esFavorito(evento)) {
             this.favoritos.push(evento);

@@ -2,6 +2,11 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import apiRouter from "./routes/index.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
+import { seedDatabase } from "./data/seed.js";
+
+seedDatabase();
 
 const app = express();
 
@@ -16,5 +21,9 @@ app.get("/api/health", (req, res) => {
         mensaje: "Backend funcionando correctamente"
     });
 });
+
+app.use("/api", apiRouter);
+
+app.use(errorHandler);
 
 export default app;

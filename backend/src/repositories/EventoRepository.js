@@ -30,8 +30,8 @@ export class EventoRepository {
                 return false;
             }
             if (precioMin !== null || precioMax !== null) {
-                const min = precioMin !== null ? Number(precioMin) : 0;
-                const max = precioMax !== null ? Number(precioMax) : Number.POSITIVE_INFINITY;
+                const min = precioMin !== null ? precioMin : 0;
+                const max = precioMax !== null ? precioMax : Number.POSITIVE_INFINITY;
                 if (!ev.tuPrecioEstaEntre(min, max)) {
                     return false;
                 }

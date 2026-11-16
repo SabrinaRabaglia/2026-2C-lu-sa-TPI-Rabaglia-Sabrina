@@ -1,0 +1,29 @@
+import { CategoriaService } from "./CategoriaService.js";
+import { UsuarioService } from "./UsuarioService.js";
+import { EventoService } from "./EventoService.js";
+import { CompraService } from "./CompraService.js";
+import { ReseniaService } from "./ReseniaService.js";
+
+export {
+    CategoriaService,
+    UsuarioService,
+    EventoService,
+    CompraService,
+    ReseniaService
+};
+
+export const categoriaService = new CategoriaService();
+export const usuarioService = new UsuarioService();
+export const eventoService = new EventoService();
+export const compraService = new CompraService();
+export const reseniaService = new ReseniaService();
+
+export const services = {
+    categoriaService,
+    usuarioService,
+    eventoService,
+    compraService,
+    reseniaService
+};
+
+export default services;

@@ -1,0 +1,228 @@
+{
+  "info": {
+    "_postman_id": "a1000000-0000-4000-8000-000000000004",
+    "name": "AI Ticket It - 04 Compras y Mensajes",
+    "description": "Colección de endpoints REST para Compras, cambios de estado, cancelación con reintegro de cupo y chat de mensajes (/api/compras)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "compradorLuciaId",
+      "value": "22222222-2222-4222-8222-222222222203",
+      "type": "string"
+    },
+    {
+      "key": "organizadorRockId",
+      "value": "22222222-2222-4222-8222-222222222201",
+      "type": "string"
+    },
+    {
+      "key": "eventoRockId",
+      "value": "44444444-4444-4444-8444-444444444401",
+      "type": "string"
+    },
+    {
+      "key": "tipoEntradaPlateaId",
+      "value": "33333333-3333-4333-8333-333333333302",
+      "type": "string"
+    },
+    {
+      "key": "compraConfirmadaId",
+      "value": "55555555-5555-4555-8555-555555555501",
+      "type": "string"
+    },
+    {
+      "key": "compraPendienteId",
+      "value": "55555555-5555-4555-8555-555555555502",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Visualizar compras de un comprador (Lucía - incluye días faltantes)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/compras?compradorId={{compradorLuciaId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["compras"],
+          "query": [
+            { "key": "compradorId", "value": "{{compradorLuciaId}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. Visualizar compras de un evento como organizador (agrupadas por estado + cupos disponibles)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/compras?eventoId={{eventoRockId}}&organizadorId={{organizadorRockId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["compras"],
+          "query": [
+            { "key": "eventoId", "value": "{{eventoRockId}}" },
+            { "key": "organizadorId", "value": "{{organizadorRockId}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Obtener detalle de una compra por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/compras/{{compraConfirmadaId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["compras", "{{compraConfirmadaId}}"]
+        }
+      }
+    },
+    {
+      "name": "4. Realizar una nueva compra",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"compradorId\": \"{{compradorLuciaId}}\",\n  \"eventoId\": \"{{eventoRockId}}\",\n  \"tipoEntradaId\": \"{{tipoEntradaPlateaId}}\",\n  \"cantidad\": 2\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/compras",
+          "host": ["{{baseUrl}}"],
+          "path": ["compras"]
+        }
+      }
+    },
+    {
+      "name": "5. Listar mensajes del chat de una compra",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/compras/{{compraConfirmadaId}}/mensajes",
+          "host": ["{{baseUrl}}"],
+          "path": ["compras", "{{compraConfirmadaId}}", "mensajes"]
+        }
+      }
+    },
+    {
+      "name": "6. Enviar mensaje como comprador en el chat de la compra",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuarioId\": \"{{compradorLuciaId}}\",\n  \"mensaje\": \"Hola, ¿se permite ingresar con cámara fotográfica?\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/compras/{{compraConfirmadaId}}/mensajes",
+          "host": ["{{baseUrl}}"],
+          "path": ["compras", "{{compraConfirmadaId}}", "mensajes"]
+        }
+      }
+    },
+    {
+      "name": "7. Responder mensaje como organizador en el chat de la compra",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuarioId\": \"{{organizadorRockId}}\",\n  \"mensaje\": \"¡Hola Lucía! Cámaras compactas sí, equipos profesionales no.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/compras/{{compraConfirmadaId}}/mensajes",
+          "host": ["{{baseUrl}}"],
+          "path": ["compras", "{{compraConfirmadaId}}", "mensajes"]
+        }
+      }
+    },
+    {
+      "name": "8. Actualizar estado de una compra (ej. pasar de PENDIENTE a CONFIRMADA)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estado\": \"CONFIRMADA\",\n  \"usuarioId\": \"{{organizadorRockId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/compras/{{compraPendienteId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["compras", "{{compraPendienteId}}"]
+        }
+      }
+    },
+    {
+      "name": "9. Cancelar una compra para obtener reembolso (DELETE /api/compras/:id)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuarioId\": \"{{compradorLuciaId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/compras/{{compraConfirmadaId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["compras", "{{compraConfirmadaId}}"]
+        }
+      }
+    },
+    {
+      "name": "10. [Error 409] Intentar comprar más entradas que el cupo disponible (CupoInsuficienteError)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"compradorId\": \"{{compradorLuciaId}}\",\n  \"eventoId\": \"{{eventoRockId}}\",\n  \"tipoEntradaId\": \"{{tipoEntradaPlateaId}}\",\n  \"cantidad\": 9999\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/compras",
+          "host": ["{{baseUrl}}"],
+          "path": ["compras"]
+        }
+      }
+    }
+  ]
+}

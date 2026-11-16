@@ -1,0 +1,126 @@
+{
+  "info": {
+    "_postman_id": "a1000000-0000-4000-8000-000000000005",
+    "name": "AI Ticket It - 05 Resenias",
+    "description": "Colección de endpoints REST para Reseñas de eventos y reputación del organizador (/api/resenias)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "organizadorRockId",
+      "value": "22222222-2222-4222-8222-222222222201",
+      "type": "string"
+    },
+    {
+      "key": "compradorLuciaId",
+      "value": "22222222-2222-4222-8222-222222222203",
+      "type": "string"
+    },
+    {
+      "key": "eventoPasadoId",
+      "value": "44444444-4444-4444-8444-444444444404",
+      "type": "string"
+    },
+    {
+      "key": "compraUtilizadaId",
+      "value": "55555555-5555-4555-8555-555555555503",
+      "type": "string"
+    },
+    {
+      "key": "compraPendienteId",
+      "value": "55555555-5555-4555-8555-555555555502",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Listar todas las reseñas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/resenias",
+          "host": ["{{baseUrl}}"],
+          "path": ["resenias"]
+        }
+      }
+    },
+    {
+      "name": "2. Listar reseñas y promedio de un organizador",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/resenias?organizadorId={{organizadorRockId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["resenias"],
+          "query": [
+            { "key": "organizadorId", "value": "{{organizadorRockId}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Listar reseñas de un evento específico",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/resenias?eventoId={{eventoPasadoId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["resenias"],
+          "query": [
+            { "key": "eventoId", "value": "{{eventoPasadoId}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Crear una reseña sobre una compra UTILIZADA",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"compraId\": \"{{compraUtilizadaId}}\",\n  \"compradorId\": \"{{compradorLuciaId}}\",\n  \"puntuacion\": 5,\n  \"detalle\": \"Una puesta en escena impresionante, volvería sin dudarlo.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/resenias",
+          "host": ["{{baseUrl}}"],
+          "path": ["resenias"]
+        }
+      }
+    },
+    {
+      "name": "5. [Error 409] Intentar reseñar una compra que NO está en estado UTILIZADA (CompraNoReseniableError)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"compraId\": \"{{compraPendienteId}}\",\n  \"puntuacion\": 4,\n  \"detalle\": \"Intento reseñar antes de usar la entrada\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/resenias",
+          "host": ["{{baseUrl}}"],
+          "path": ["resenias"]
+        }
+      }
+    }
+  ]
+}

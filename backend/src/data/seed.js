@@ -10,6 +10,46 @@ import {
 } from "../models/index.js";
 import defaultRepositories from "../repositories/index.js";
 
+export const SEED_IDS = Object.freeze({
+    categorias: {
+        recitales: "11111111-1111-4111-8111-111111111101",
+        teatro: "11111111-1111-4111-8111-111111111102",
+        conferencias: "11111111-1111-4111-8111-111111111103",
+        deportes: "11111111-1111-4111-8111-111111111104"
+    },
+    usuarios: {
+        orgRock: "22222222-2222-4222-8222-222222222201",
+        orgTech: "22222222-2222-4222-8222-222222222202",
+        compLucia: "22222222-2222-4222-8222-222222222203",
+        compMateo: "22222222-2222-4222-8222-222222222204"
+    },
+    tiposEntrada: {
+        rockCampo: "33333333-3333-4333-8333-333333333301",
+        rockPlatea: "33333333-3333-4333-8333-333333333302",
+        rockVip: "33333333-3333-4333-8333-333333333303",
+        teatroGeneral: "33333333-3333-4333-8333-333333333304",
+        teatroFila1: "33333333-3333-4333-8333-333333333305",
+        confGeneral: "33333333-3333-4333-8333-333333333306",
+        confWorkshop: "33333333-3333-4333-8333-333333333307",
+        pasadoGeneral: "33333333-3333-4333-8333-333333333308"
+    },
+    eventos: {
+        festivalRock: "44444444-4444-4444-8444-444444444401",
+        teatroStandUp: "44444444-4444-4444-8444-444444444402",
+        conferenciaIA: "44444444-4444-4444-8444-444444444403",
+        acusticoPasado: "44444444-4444-4444-8444-444444444404"
+    },
+    compras: {
+        confirmada: "55555555-5555-4555-8555-555555555501",
+        pendiente: "55555555-5555-4555-8555-555555555502",
+        utilizada: "55555555-5555-4555-8555-555555555503"
+    },
+    resenias: {
+        resenia1: "66666666-6666-4666-8666-666666666601",
+        resenia2: "66666666-6666-4666-8666-666666666602"
+    }
+});
+
 export function seedDatabase(repos = defaultRepositories) {
     const {
         categoriaRepository,
@@ -33,59 +73,123 @@ export function seedDatabase(repos = defaultRepositories) {
 
     // 1. Categorías
     const catRecitales = categoriaRepository.save(
-        new Categoria({ nombre: "Recitales", descripcion: "Conciertos y festivales de música en vivo" })
+        new Categoria({
+            id: SEED_IDS.categorias.recitales,
+            nombre: "Recitales",
+            descripcion: "Conciertos y festivales de música en vivo"
+        })
     );
     const catTeatro = categoriaRepository.save(
-        new Categoria({ nombre: "Teatro", descripcion: "Obras teatrales, musicales y stand-up" })
+        new Categoria({
+            id: SEED_IDS.categorias.teatro,
+            nombre: "Teatro",
+            descripcion: "Obras teatrales, musicales y stand-up"
+        })
     );
     const catConferencias = categoriaRepository.save(
-        new Categoria({ nombre: "Conferencias", descripcion: "Charlas de tecnología, negocios y ciencia" })
+        new Categoria({
+            id: SEED_IDS.categorias.conferencias,
+            nombre: "Conferencias",
+            descripcion: "Charlas de tecnología, negocios y ciencia"
+        })
     );
     const catDeportes = categoriaRepository.save(
-        new Categoria({ nombre: "Deportes", descripcion: "Torneos y exhibiciones deportivas" })
+        new Categoria({
+            id: SEED_IDS.categorias.deportes,
+            nombre: "Deportes",
+            descripcion: "Torneos y exhibiciones deportivas"
+        })
     );
 
     // 2. Usuarios (Organizadores y Compradores)
     const orgRock = usuarioRepository.save(
-        new Usuario({ nombre: "Martín", apellido: "Productor" })
+        new Usuario({ id: SEED_IDS.usuarios.orgRock, nombre: "Martín", apellido: "Productor" })
     );
     const orgTech = usuarioRepository.save(
-        new Usuario({ nombre: "Sofía", apellido: "Innovación" })
+        new Usuario({ id: SEED_IDS.usuarios.orgTech, nombre: "Sofía", apellido: "Innovación" })
     );
     const compLucia = usuarioRepository.save(
-        new Usuario({ nombre: "Lucía", apellido: "Gómez" })
+        new Usuario({ id: SEED_IDS.usuarios.compLucia, nombre: "Lucía", apellido: "Gómez" })
     );
     const compMateo = usuarioRepository.save(
-        new Usuario({ nombre: "Mateo", apellido: "Fernández" })
+        new Usuario({ id: SEED_IDS.usuarios.compMateo, nombre: "Mateo", apellido: "Fernández" })
     );
 
     // 3. Tipos de Entrada
     const rockCampo = tipoEntradaRepository.save(
-        new TipoEntrada({ nombre: "Campo General", descripcion: "Acceso a campo de pie", precio: 25000, cupo: 150 })
+        new TipoEntrada({
+            id: SEED_IDS.tiposEntrada.rockCampo,
+            nombre: "Campo General",
+            descripcion: "Acceso a campo de pie",
+            precio: 25000,
+            cupo: 150
+        })
     );
     const rockPlatea = tipoEntradaRepository.save(
-        new TipoEntrada({ nombre: "Platea Preferencial", descripcion: "Butaca numerada", precio: 45000, cupo: 60 })
+        new TipoEntrada({
+            id: SEED_IDS.tiposEntrada.rockPlatea,
+            nombre: "Platea Preferencial",
+            descripcion: "Butaca numerada",
+            precio: 45000,
+            cupo: 60
+        })
     );
     const rockVip = tipoEntradaRepository.save(
-        new TipoEntrada({ nombre: "VIP Lounge", descripcion: "Acceso exclusivo frente al escenario", precio: 80000, cupo: 20 })
+        new TipoEntrada({
+            id: SEED_IDS.tiposEntrada.rockVip,
+            nombre: "VIP Lounge",
+            descripcion: "Acceso exclusivo frente al escenario",
+            precio: 80000,
+            cupo: 20
+        })
     );
 
     const teatroGeneral = tipoEntradaRepository.save(
-        new TipoEntrada({ nombre: "Pullman", descripcion: "Ubicación planta alta", precio: 18000, cupo: 80 })
+        new TipoEntrada({
+            id: SEED_IDS.tiposEntrada.teatroGeneral,
+            nombre: "Pullman",
+            descripcion: "Ubicación planta alta",
+            precio: 18000,
+            cupo: 80
+        })
     );
     const teatroFila1 = tipoEntradaRepository.save(
-        new TipoEntrada({ nombre: "Platea Baja", descripcion: "Primeras filas", precio: 32000, cupo: 40 })
+        new TipoEntrada({
+            id: SEED_IDS.tiposEntrada.teatroFila1,
+            nombre: "Platea Baja",
+            descripcion: "Primeras filas",
+            precio: 32000,
+            cupo: 40
+        })
     );
 
     const confGeneral = tipoEntradaRepository.save(
-        new TipoEntrada({ nombre: "General Pass", descripcion: "Acceso a todas las charlas", precio: 15000, cupo: 200 })
+        new TipoEntrada({
+            id: SEED_IDS.tiposEntrada.confGeneral,
+            nombre: "General Pass",
+            descripcion: "Acceso a todas las charlas",
+            precio: 15000,
+            cupo: 200
+        })
     );
     const confWorkshop = tipoEntradaRepository.save(
-        new TipoEntrada({ nombre: "Full Pass + Workshops", descripcion: "Incluye talleres prácticos", precio: 35000, cupo: 40 })
+        new TipoEntrada({
+            id: SEED_IDS.tiposEntrada.confWorkshop,
+            nombre: "Full Pass + Workshops",
+            descripcion: "Incluye talleres prácticos",
+            precio: 35000,
+            cupo: 40
+        })
     );
 
     const pasadoGeneral = tipoEntradaRepository.save(
-        new TipoEntrada({ nombre: "Entrada General", descripcion: "Acceso general", precio: 20000, cupo: 100 })
+        new TipoEntrada({
+            id: SEED_IDS.tiposEntrada.pasadoGeneral,
+            nombre: "Entrada General",
+            descripcion: "Acceso general",
+            precio: 20000,
+            cupo: 100
+        })
     );
 
     // 4. Eventos (futuros y uno pasado para reseñas)
@@ -94,6 +198,7 @@ export function seedDatabase(repos = defaultRepositories) {
 
     const evFestivalRock = eventoRepository.save(
         new Evento({
+            id: SEED_IDS.eventos.festivalRock,
             nombre: "BA Rock Festival 2027",
             descripcion: "Las mejores bandas de rock nacional en una noche única al aire libre.",
             categoria: catRecitales,
@@ -106,6 +211,7 @@ export function seedDatabase(repos = defaultRepositories) {
 
     const evTeatro = eventoRepository.save(
         new Evento({
+            id: SEED_IDS.eventos.teatroStandUp,
             nombre: "Noche de Stand Up & Comedia",
             descripcion: "Espectáculo de humor en vivo en calle Corrientes.",
             categoria: catTeatro,
@@ -118,6 +224,7 @@ export function seedDatabase(repos = defaultRepositories) {
 
     const evConferenciaIA = eventoRepository.save(
         new Evento({
+            id: SEED_IDS.eventos.conferenciaIA,
             nombre: "AI & Software Summit",
             descripcion: "Conferencia sobre desarrollo de software asistido por Inteligencia Artificial.",
             categoria: catConferencias,
@@ -130,6 +237,7 @@ export function seedDatabase(repos = defaultRepositories) {
 
     const evAcusticoPasado = eventoRepository.save(
         new Evento({
+            id: SEED_IDS.eventos.acusticoPasado,
             nombre: "Acústico Íntimo de Invierno",
             descripcion: "Show acústico exclusivo a sala llena.",
             categoria: catRecitales,
@@ -149,6 +257,7 @@ export function seedDatabase(repos = defaultRepositories) {
     rockCampo.descontarCupo(2);
     const compraConfirmada = compraRepository.save(
         new Compra({
+            id: SEED_IDS.compras.confirmada,
             comprador: compLucia,
             evento: evFestivalRock,
             tipoEntrada: rockCampo,
@@ -190,6 +299,7 @@ export function seedDatabase(repos = defaultRepositories) {
     confWorkshop.descontarCupo(1);
     const compraPendiente = compraRepository.save(
         new Compra({
+            id: SEED_IDS.compras.pendiente,
             comprador: compMateo,
             evento: evConferenciaIA,
             tipoEntrada: confWorkshop,
@@ -210,6 +320,7 @@ export function seedDatabase(repos = defaultRepositories) {
     pasadoGeneral.descontarCupo(2);
     const compraUtilizada = compraRepository.save(
         new Compra({
+            id: SEED_IDS.compras.utilizada,
             comprador: compLucia,
             evento: evAcusticoPasado,
             tipoEntrada: pasadoGeneral,
@@ -229,6 +340,7 @@ export function seedDatabase(repos = defaultRepositories) {
     // 6. Reseñas
     const resenia1 = reseniaRepository.save(
         new Resenia({
+            id: SEED_IDS.resenias.resenia1,
             comprador: compLucia,
             evento: evAcusticoPasado,
             detalle: "Excelente sonido y organización impecable. Súper puntual.",
@@ -237,6 +349,7 @@ export function seedDatabase(repos = defaultRepositories) {
     );
     const resenia2 = reseniaRepository.save(
         new Resenia({
+            id: SEED_IDS.resenias.resenia2,
             comprador: compMateo,
             evento: evAcusticoPasado,
             detalle: "Muy buen show, el ingreso fue súper rápido.",

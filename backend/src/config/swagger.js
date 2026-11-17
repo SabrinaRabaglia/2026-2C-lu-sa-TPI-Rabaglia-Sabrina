@@ -553,8 +553,14 @@ export const swaggerSpec = {
                     {
                         name: "categoriaId",
                         in: "query",
-                        description: "Filtrar por ID de categoría",
-                        schema: { type: "string", format: "uuid" }
+                        description: "Filtrar por una categoría (UUID) o varias separadas por coma",
+                        schema: { type: "string" }
+                    },
+                    {
+                        name: "categoriaIds",
+                        in: "query",
+                        description: "Filtrar por múltiples IDs de categoría separados por coma (ej: id1,id2)",
+                        schema: { type: "string" }
                     },
                     {
                         name: "organizadorId",
@@ -585,6 +591,18 @@ export const swaggerSpec = {
                         in: "query",
                         description: "Dirección de ordenamiento (asc o desc)",
                         schema: { type: "string", enum: ["asc", "desc"] }
+                    },
+                    {
+                        name: "page",
+                        in: "query",
+                        description: "Número de página (1-indexed). Si se envía page o limit, la respuesta incluye metadatos de paginación.",
+                        schema: { type: "integer", minimum: 1 }
+                    },
+                    {
+                        name: "limit",
+                        in: "query",
+                        description: "Cantidad de elementos por página",
+                        schema: { type: "integer", minimum: 1 }
                     }
                 ],
                 responses: {

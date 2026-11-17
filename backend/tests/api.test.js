@@ -48,8 +48,19 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         assert.equal(eventos.length, 1);
         assert.equal(eventos[0].nombre, "BA Rock Festival 2027");
 
-        const [catRecitales] = seedData.categorias;
+        const [catRecitales, catTeatro, catConferencias] = seedData.categorias;
         const [orgRock] = seedData.usuarios;
+
+        // Filtro por múltiples categorías + paginación
+        const resMultiCatPage = await fetch(
+            `${baseUrl}/eventos?categoriaIds=${catRecitales.id},${catTeatro.id}&page=1&limit=2`
+        );
+        assert.equal(resMultiCatPage.status, 200);
+        const paginado = await resMultiCatPage.json();
+        assert.equal(paginado.items.length, 2);
+        assert.equal(paginado.pagination.total, 3);
+        assert.equal(paginado.pagination.totalPages, 2);
+        assert.equal(paginado.pagination.hasNextPage, true);
 
         const resPost = await fetch(`${baseUrl}/eventos`, {
             method: "POST",

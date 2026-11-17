@@ -61,16 +61,44 @@ export class CompraService {
         return this.enriquecerCompra(compra, fechaReferencia);
     }
 
-    listarCompras({ compradorId = null, eventoId = null, organizadorId = null } = {}, fechaReferencia = new Date()) {
+    paginarResultados(lista, page = null, limit = null) {
+        if (page === null && limit === null) {
+            return lista;
+        }
+        const paginaActual = Math.max(1, Number.parseInt(page, 10) || 1);
+        const tamanioPagina = Math.max(1, Number.parseInt(limit, 10) || 10);
+        const total = lista.length;
+        const totalPages = Math.max(1, Math.ceil(total / tamanioPagina));
+        const inicio = (paginaActual - 1) * tamanioPagina;
+        const items = lista.slice(inicio, inicio + tamanioPagina);
+
+        return {
+            items,
+            pagination: {
+                page: paginaActual,
+                limit: tamanioPagina,
+                total,
+                totalPages,
+                hasNextPage: paginaActual < totalPages,
+                hasPrevPage: paginaActual > 1
+            }
+        };
+    }
+
+    listarCompras(
+        { compradorId = null, eventoId = null, organizadorId = null, page = null, limit = null } = {},
+        fechaReferencia = new Date()
+    ) {
         if (eventoId) {
             return this.obtenerComprasPorEvento(eventoId, organizadorId, fechaReferencia);
         }
-        if (compradorId) {
-            return this.obtenerComprasPorComprador(compradorId, fechaReferencia);
-        }
-        return this.compraRepository
-            .findAll()
-            .map((c) => this.enriquecerCompra(c, fechaReferencia));
+        const compras = compradorId
+            ? this.obtenerComprasPorComprador(compradorId, fechaReferencia)
+            : this.compraRepository
+                  .findAll()
+                  .map((c) => this.enriquecerCompra(c, fechaReferencia));
+
+        return this.paginarResultados(compras, page, limit);
     }
 
     obtenerMensajesPorCompra(compraId) {

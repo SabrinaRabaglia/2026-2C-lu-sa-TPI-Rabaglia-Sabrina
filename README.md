@@ -239,7 +239,7 @@ Todos los endpoints pueden probarse en vivo desde **Swagger UI** en `http://loca
 | `GET` | `/api/usuarios/:id/favoritos` | Lista los eventos favoritos de un usuario. |
 | `POST` | `/api/usuarios/:id/favoritos` | Agrega un evento a favoritos (`{ eventoId }`). |
 | `DELETE` | `/api/usuarios/:id/favoritos/:eventoId` | Quita un evento de los favoritos del usuario. |
-| `GET` | `/api/eventos` | Busca, filtra (`texto`, `categoriaId`, `organizadorId`, `precioMin`, `precioMax`) y ordena (`ordenarPor=precio\|fecha\|puntaje`, `direccion=asc\|desc`) eventos. |
+| `GET` | `/api/eventos` | Busca, filtra (`texto`, `categoriaId`, `categoriaIds`, `organizadorId`, `precioMin`, `precioMax`), ordena (`ordenarPor=precio\|fecha\|puntaje`, `direccion=asc\|desc`) y pagina (`page`, `limit`) eventos. |
 | `GET` | `/api/eventos/:id` | Obtiene el detalle de un evento incluyendo puntaje y reseñas previas del organizador. |
 | `POST` | `/api/eventos` | Publica un nuevo evento con sus tipos de entrada, precios y cupos. |
 | `GET` | `/api/eventos/:eventoId/compras` | **(Vista Organizador)** Devuelve las compras del evento agrupadas por estado y los cupos disponibles por tipo de entrada. |

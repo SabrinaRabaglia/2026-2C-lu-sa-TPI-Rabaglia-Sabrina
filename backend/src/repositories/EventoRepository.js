@@ -21,12 +21,40 @@ export class EventoRepository {
         return this.eventos.filter((ev) => ev.categoria?.id === categoriaId);
     }
 
-    buscar({ texto = "", categoriaId = null, precioMin = null, precioMax = null } = {}) {
+    normalizarCategorias(categoriaId, categoriaIds) {
+        const entrada = categoriaIds ?? categoriaId;
+        if (!entrada) {
+            return [];
+        }
+        if (Array.isArray(entrada)) {
+            return entrada
+                .flatMap((item) => String(item).split(","))
+                .map((id) => id.trim())
+                .filter(Boolean);
+        }
+        if (typeof entrada === "string") {
+            return entrada
+                .split(",")
+                .map((id) => id.trim())
+                .filter(Boolean);
+        }
+        return [];
+    }
+
+    buscar({
+        texto = "",
+        categoriaId = null,
+        categoriaIds = null,
+        precioMin = null,
+        precioMax = null
+    } = {}) {
+        const idsCategorias = this.normalizarCategorias(categoriaId, categoriaIds);
+
         return this.eventos.filter((ev) => {
             if (texto && !ev.coincideConBusqueda(texto)) {
                 return false;
             }
-            if (categoriaId && ev.categoria?.id !== categoriaId) {
+            if (idsCategorias.length > 0 && !idsCategorias.includes(ev.categoria?.id)) {
                 return false;
             }
             if (precioMin !== null || precioMax !== null) {

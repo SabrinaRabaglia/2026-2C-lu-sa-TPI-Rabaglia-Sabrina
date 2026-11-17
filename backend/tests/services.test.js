@@ -53,6 +53,23 @@ describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () 
 
         const porPuntajeDesc = eventoService.buscarEventos({ ordenarPor: "puntaje" });
         assert.ok(porPuntajeDesc[0].puntajeOrganizador >= porPuntajeDesc[porPuntajeDesc.length - 1].puntajeOrganizador);
+
+        // Filtrado por múltiples categorías (Recitales y Teatro)
+        const [catRecitales, catTeatro, catConferencias] = seedData.categorias;
+        const multiCategoria = eventoService.buscarEventos({
+            categoriaIds: `${catTeatro.id},${catConferencias.id}`
+        });
+        assert.equal(multiCategoria.length, 2);
+
+        // Paginación de eventos
+        const pagina1 = eventoService.buscarEventos({ ordenarPor: "precio", direccion: "asc", page: 1, limit: 2 });
+        assert.equal(pagina1.items.length, 2);
+        assert.equal(pagina1.pagination.page, 1);
+        assert.equal(pagina1.pagination.limit, 2);
+        assert.equal(pagina1.pagination.total, 4);
+        assert.equal(pagina1.pagination.totalPages, 2);
+        assert.equal(pagina1.pagination.hasNextPage, true);
+        assert.equal(pagina1.pagination.hasPrevPage, false);
     });
 
     it("CompraService: debe realizar una compra, descontar cupo, registrar cambio de estado y calcular días faltantes", () => {

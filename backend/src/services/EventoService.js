@@ -68,14 +68,41 @@ export class EventoService {
         return this.enriquecerEvento(evento);
     }
 
+    paginarResultados(lista, page = null, limit = null) {
+        if (page === null && limit === null) {
+            return lista;
+        }
+        const paginaActual = Math.max(1, Number.parseInt(page, 10) || 1);
+        const tamanioPagina = Math.max(1, Number.parseInt(limit, 10) || 10);
+        const total = lista.length;
+        const totalPages = Math.max(1, Math.ceil(total / tamanioPagina));
+        const inicio = (paginaActual - 1) * tamanioPagina;
+        const items = lista.slice(inicio, inicio + tamanioPagina);
+
+        return {
+            items,
+            pagination: {
+                page: paginaActual,
+                limit: tamanioPagina,
+                total,
+                totalPages,
+                hasNextPage: paginaActual < totalPages,
+                hasPrevPage: paginaActual > 1
+            }
+        };
+    }
+
     buscarEventos({
         texto = "",
         categoriaId = null,
+        categoriaIds = null,
         organizadorId = null,
         precioMin = null,
         precioMax = null,
         ordenarPor = null,
-        direccion = null
+        direccion = null,
+        page = null,
+        limit = null
     } = {}) {
         const min = precioMin !== null && precioMin !== "" ? Number(precioMin) : null;
         const max = precioMax !== null && precioMax !== "" ? Number(precioMax) : null;
@@ -83,6 +110,7 @@ export class EventoService {
         let eventosFiltrados = this.eventoRepository.buscar({
             texto,
             categoriaId,
+            categoriaIds,
             precioMin: min,
             precioMax: max
         });
@@ -114,7 +142,7 @@ export class EventoService {
             });
         }
 
-        return enriquecidos;
+        return this.paginarResultados(enriquecidos, page, limit);
     }
 
     listarEventosPorOrganizador(organizadorId) {

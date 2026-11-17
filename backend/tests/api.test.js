@@ -133,6 +133,24 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         assert.equal(resGetOrg.status, 200);
         const dataOrg = await resGetOrg.json();
         assert.equal(dataOrg.totalResenias, 3);
+
+        const resRep = await fetch(`${baseUrl}/usuarios/${orgRock.id}/reputacion`);
+        assert.equal(resRep.status, 200);
+        const repData = await resRep.json();
+        assert.equal(repData.totalResenias, 3);
+    });
+
+    it("GET /api/eventos/:eventoId/compras debe devolver el resumen de ventas y cupos para el organizador", async () => {
+        const [orgRock] = seedData.usuarios;
+        const [evFestivalRock] = seedData.eventos;
+
+        const resVentas = await fetch(
+            `${baseUrl}/eventos/${evFestivalRock.id}/compras?organizadorId=${orgRock.id}`
+        );
+        assert.equal(resVentas.status, 200);
+        const bodyVentas = await resVentas.json();
+        assert.equal(bodyVentas.eventoId, evFestivalRock.id);
+        assert.equal(bodyVentas.disponibilidadEntradas.length, 3);
     });
 
     it("POST y DELETE /api/usuarios/:id/favoritos deben gestionar favoritos de forma RESTful", async () => {
@@ -188,5 +206,22 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         assert.equal(resDomainErr.status, 409);
         const domainErrBody = await resDomainErr.json();
         assert.equal(domainErrBody.tipo, "CompraNoReseniableError");
+    });
+
+    it("GET /api-docs.json y GET /api-docs/ deben servir la documentación OpenAPI/Swagger", async () => {
+        const rootUrl = baseUrl.replace(/\/api$/, "");
+
+        const resSpec = await fetch(`${rootUrl}/api-docs.json`);
+        assert.equal(resSpec.status, 200);
+        const spec = await resSpec.json();
+        assert.equal(spec.openapi, "3.0.3");
+        assert.equal(spec.info.title, "AI Ticket It - API REST");
+        assert.ok(spec.paths["/api/eventos"]);
+        assert.ok(spec.paths["/api/compras"]);
+
+        const resUi = await fetch(`${rootUrl}/api-docs/`);
+        assert.equal(resUi.status, 200);
+        const html = await resUi.text();
+        assert.ok(html.includes("swagger-ui"));
     });
 });

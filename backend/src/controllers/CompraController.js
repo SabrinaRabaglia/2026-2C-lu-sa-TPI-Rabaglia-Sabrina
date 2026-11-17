@@ -6,7 +6,10 @@ export class CompraController {
     }
 
     listar = (req, res) => {
-        const compras = this.compraService.listarCompras(req.query);
+        const compras = this.compraService.listarCompras({
+            ...req.query,
+            eventoId: req.params.eventoId || req.query.eventoId || null
+        });
         res.status(200).json(compras);
     };
 

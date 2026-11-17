@@ -6,5 +6,6 @@ dotenv.config();
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Servidor escuchando en puerto ${PORT}`);
+    console.log(`Servidor escuchando en http://localhost:${PORT}`);
+    console.log(`Documentación Swagger disponible en http://localhost:${PORT}/api-docs`);
 });

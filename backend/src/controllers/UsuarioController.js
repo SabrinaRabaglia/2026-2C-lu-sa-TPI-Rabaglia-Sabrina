@@ -34,6 +34,11 @@ export class UsuarioController {
         const usuario = this.usuarioService.quitarFavorito(req.params.id, req.params.eventoId);
         res.status(200).json(usuario);
     };
+
+    obtenerReputacion = (req, res) => {
+        const reputacion = this.usuarioService.obtenerReputacionOrganizador(req.params.id);
+        res.status(200).json(reputacion);
+    };
 }
 
 export default UsuarioController;

@@ -1,7 +1,9 @@
 import {
     EstadoCompra,
     Compra,
-    CambioEstadoCompra
+    CambioEstadoCompra,
+    EventoFinalizadoError,
+    AutoCompraNoPermitidaError
 } from "../models/index.js";
 import {
     compraRepository as defaultCompraRepo,
@@ -9,7 +11,8 @@ import {
     eventoRepository as defaultEventoRepo,
     tipoEntradaRepository as defaultTipoEntradaRepo,
     mensajeRepository as defaultMensajeRepo,
-    cambioEstadoCompraRepository as defaultCambioEstadoRepo
+    cambioEstadoCompraRepository as defaultCambioEstadoRepo,
+    reseniaRepository as defaultReseniaRepo
 } from "../repositories/index.js";
 import {
     EntidadNoEncontradaError,
@@ -24,7 +27,8 @@ export class CompraService {
         eventoRepository = defaultEventoRepo,
         tipoEntradaRepository = defaultTipoEntradaRepo,
         mensajeRepository = defaultMensajeRepo,
-        cambioEstadoCompraRepository = defaultCambioEstadoRepo
+        cambioEstadoCompraRepository = defaultCambioEstadoRepo,
+        reseniaRepository = defaultReseniaRepo
     } = {}) {
         this.compraRepository = compraRepository;
         this.usuarioRepository = usuarioRepository;
@@ -32,10 +36,12 @@ export class CompraService {
         this.tipoEntradaRepository = tipoEntradaRepository;
         this.mensajeRepository = mensajeRepository;
         this.cambioEstadoCompraRepository = cambioEstadoCompraRepository;
+        this.reseniaRepository = reseniaRepository;
     }
 
     enriquecerCompra(compra, fechaReferencia = new Date()) {
         const cambiosEstado = this.cambioEstadoCompraRepository.findByCompraId(compra.id);
+        const yaFueReseniada = Boolean(this.reseniaRepository.findByCompraId(compra.id));
         return {
             ...compra,
             id: compra.id,
@@ -48,7 +54,8 @@ export class CompraService {
             mensajes: compra.mensajes,
             diasFaltantesParaEvento: compra.diasFaltantesParaEvento(fechaReferencia),
             puedeCancelarse: compra.puedeCancelarse(fechaReferencia),
-            puedeSerReseniada: compra.puedeSerReseniada(),
+            yaFueReseniada,
+            puedeSerReseniada: compra.puedeSerReseniada(yaFueReseniada),
             cambiosEstado
         };
     }
@@ -145,9 +152,35 @@ export class CompraService {
             cupoDisponible: tipo.cupo
         }));
 
+        const comprasPagas = compras.filter(
+            (c) => c.estado === EstadoCompra.CONFIRMADA || c.estado === EstadoCompra.UTILIZADA
+        );
+        const comprasActivas = compras.filter(
+            (c) =>
+                c.estado === EstadoCompra.PENDIENTE ||
+                c.estado === EstadoCompra.CONFIRMADA ||
+                c.estado === EstadoCompra.UTILIZADA
+        );
+        const recaudacionTotal = comprasPagas.reduce((acc, c) => acc + c.total, 0);
+        const entradasVendidas = comprasPagas.reduce((acc, c) => acc + c.cantidad, 0);
+        const entradasReservadas = comprasActivas.reduce((acc, c) => acc + c.cantidad, 0);
+        const cupoTotalDisponible = evento.cupoTotalDisponible();
+        const capacidadTotal = cupoTotalDisponible + entradasReservadas;
+        const porcentajeOcupacion =
+            capacidadTotal > 0 ? Number(((entradasReservadas / capacidadTotal) * 100).toFixed(2)) : 0;
+
         return {
             eventoId: evento.id,
             nombreEvento: evento.nombre,
+            metricas: {
+                recaudacionTotal,
+                entradasVendidas,
+                entradasReservadas,
+                cupoTotalDisponible,
+                capacidadTotal,
+                porcentajeOcupacion,
+                agotado: evento.estaAgotado()
+            },
             compras,
             resumenPorEstado,
             disponibilidadEntradas
@@ -159,7 +192,7 @@ export class CompraService {
         eventoId,
         tipoEntradaId,
         cantidad,
-        estadoInicial = EstadoCompra.CONFIRMADA,
+        estadoInicial = EstadoCompra.PENDIENTE,
         fecha = new Date()
     }) {
         const comprador = this.usuarioRepository.findById(compradorId);
@@ -170,6 +203,14 @@ export class CompraService {
         const evento = this.eventoRepository.findById(eventoId);
         if (!evento) {
             throw new EntidadNoEncontradaError("Evento", eventoId);
+        }
+
+        if (evento.yaOcurrio(fecha)) {
+            throw new EventoFinalizadoError(evento.nombre);
+        }
+
+        if (evento.organizador?.id === comprador.id) {
+            throw new AutoCompraNoPermitidaError();
         }
 
         const tipoEntrada = evento.tiposEntrada.find((t) => t.id === tipoEntradaId);
@@ -218,6 +259,16 @@ export class CompraService {
             if (!usuario) {
                 throw new EntidadNoEncontradaError("Usuario", usuarioId);
             }
+            if (estadoDestino === EstadoCompra.UTILIZADA && !compra.esOrganizadorDelEvento(usuario)) {
+                throw new OperacionNoAutorizadaError(
+                    "Solo el organizador del evento puede marcar una entrada como UTILIZADA"
+                );
+            }
+            if (!compra.esParticipanteDelChat(usuario)) {
+                throw new OperacionNoAutorizadaError(
+                    "Solo el comprador titular o el organizador del evento pueden modificar esta compra"
+                );
+            }
             responsable = usuario;
         }
 
@@ -247,10 +298,21 @@ export class CompraService {
             if (!usuario) {
                 throw new EntidadNoEncontradaError("Usuario", usuarioId);
             }
+            if (!compra.esParticipanteDelChat(usuario)) {
+                throw new OperacionNoAutorizadaError(
+                    "Solo el comprador titular o el organizador del evento pueden cancelar esta compra"
+                );
+            }
             responsable = usuario;
         }
 
-        compra.cancelar(fechaReferencia, EstadoCompra.REEMBOLSADA);
+        // Si la compra estaba PENDIENTE (no pagada), pasa a CANCELADA; si estaba CONFIRMADA, pasa a REEMBOLSADA
+        const estadoFinal =
+            compra.estado === EstadoCompra.PENDIENTE
+                ? EstadoCompra.CANCELADA
+                : EstadoCompra.REEMBOLSADA;
+
+        compra.cancelar(fechaReferencia, estadoFinal);
         this.tipoEntradaRepository.save(compra.tipoEntrada);
         this.compraRepository.save(compra);
 

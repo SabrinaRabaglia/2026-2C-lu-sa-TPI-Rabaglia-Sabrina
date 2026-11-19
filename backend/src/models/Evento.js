@@ -48,6 +48,14 @@ export class Evento {
         return Math.min(...this.tiposEntrada.map((tipo) => tipo.precio));
     }
 
+    cupoTotalDisponible() {
+        return this.tiposEntrada.reduce((acc, tipo) => acc + tipo.cupo, 0);
+    }
+
+    estaAgotado() {
+        return this.cupoTotalDisponible() === 0;
+    }
+
     yaOcurrio(fechaReferencia = new Date()) {
         const ref = fechaReferencia instanceof Date ? fechaReferencia : new Date(fechaReferencia);
         return this.fecha.getTime() <= ref.getTime();

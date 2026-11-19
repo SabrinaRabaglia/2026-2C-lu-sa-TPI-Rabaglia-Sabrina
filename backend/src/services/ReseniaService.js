@@ -1,6 +1,7 @@
 import {
     Resenia,
-    CompraNoReseniableError
+    CompraNoReseniableError,
+    CompraYaReseniadaError
 } from "../models/index.js";
 import {
     reseniaRepository as defaultReseniaRepo,
@@ -51,7 +52,12 @@ export class ReseniaService {
             throw new CompraNoReseniableError();
         }
 
+        if (this.reseniaRepository.findByCompraId(compra.id)) {
+            throw new CompraYaReseniadaError();
+        }
+
         const resenia = new Resenia({
+            compraId: compra.id,
             comprador: compra.comprador,
             evento: compra.evento,
             detalle,

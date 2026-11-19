@@ -42,8 +42,26 @@ El proyecto está organizado en dos módulos principales dentro del repositorio:
 │   │   └── app.js                 # Configuración de Express y middlewares globales
 │   ├── tests/                     # Suites de pruebas (Dominio, Repositorios, Servicios y API)
 │   └── server.js                  # Punto de entrada del servidor HTTP
-└── frontend/                      # Aplicación Mobile (React Native)
+└── frontend/                      # Aplicación Mobile (React Native + Expo en JavaScript .js/.jsx)
+    ├── .env                       # URL de conexión LAN al backend (EXPO_PUBLIC_API_URL)
+    ├── jsconfig.json              # Configuración de alias @/* -> ./src/*
+    └── src/
+        ├── api/                   # Cliente HTTP fetch y módulos REST (usuarios, categorias, eventos, compras, resenias)
+        ├── app/                   # Rutas Expo Router: login, (comprador), (organizador), evento/*, compra/*
+        ├── components/            # Componentes UI reutilizables en español (TarjetaEvento, InsigniaEstado, BarraCupo...)
+        ├── context/               # SesionContext (usuario activo + modo COMPRADOR/ORGANIZADOR)
+        ├── hooks/                 # Hooks de @tanstack/react-query (useEventos, useCompras, useFavoritos...)
+        ├── lib/                   # formato.js (moneda ARS y fechas es-AR) y estadoCompra.js
+        └── tema.js                # Sistema de diseño centralizado (colores, espaciado, tipografia)
 ```
+
+### Tecnologías del Frontend
+- **Framework:** Expo (SDK 58) + React Native (`0.88`) en **JavaScript (`.js` / `.jsx`)**
+- **Navegación:** Expo Router (tabs por modo + stacks compartidos)
+- **Estado de Servidor:** `@tanstack/react-query` (caché, mutaciones optimistas, polling de chat cada 5s)
+- **Formularios y Validación:** `react-hook-form` + `zod` + `@hookform/resolvers`
+- **Fechas y Moneda:** `date-fns` (`es` locale) + `Intl.NumberFormat('es-AR')`
+- **Íconos, Imágenes y Sesión:** `@expo/vector-icons` (`Ionicons`), `expo-image`, `@react-native-async-storage/async-storage`
 
 ### Tecnologías del Backend
 - **Runtime:** Node.js (ES Modules)
@@ -206,9 +224,33 @@ Una vez iniciado, el servidor escuchará en:
 
 ---
 
+## 📱 Instalación y Ejecución del Frontend (React Native + Expo)
+
+### 1. Instalar dependencias
+```bash
+cd frontend
+npm install
+```
+
+### 2. Configurar la IP local en `.env`
+Para probar en un teléfono físico con **Expo Go**, `localhost` apunta al propio teléfono. Por eso el archivo `frontend/.env` define la IP LAN de la computadora donde corre el backend:
+```env
+EXPO_PUBLIC_API_URL=http://10.15.31.38:3000
+```
+*(Si cambiás de red Wi-Fi, actualizá esa IP por la IPv4 que muestre `ipconfig`. En emulador Android hace fallback automático a `http://10.0.2.2:3000` y en iOS/Web a `http://localhost:3000`).*
+
+### 3. Iniciar Expo
+```bash
+cd frontend
+npx expo start
+```
+Escaneá el código QR con la app **Expo Go** (o presioná `a` para abrir en emulador Android / `w` para Web).
+
+---
+
 ## 🧪 Ejecución de Pruebas Automatizadas
 
-El backend cuenta con **28 pruebas automatizadas** distribuidas en 4 suites que verifican el modelo de dominio, los repositorios en memoria, la capa de servicios y los endpoints HTTP de la API REST:
+El backend cuenta con **30 pruebas automatizadas** distribuidas en 4 suites que verifican el modelo de dominio, los repositorios en memoria, la capa de servicios y los endpoints HTTP de la API REST:
 
 ```bash
 cd backend
@@ -239,10 +281,10 @@ Todos los endpoints pueden probarse en vivo desde **Swagger UI** en `http://loca
 | `GET` | `/api/usuarios/:id/favoritos` | Lista los eventos favoritos de un usuario. |
 | `POST` | `/api/usuarios/:id/favoritos` | Agrega un evento a favoritos (`{ eventoId }`). |
 | `DELETE` | `/api/usuarios/:id/favoritos/:eventoId` | Quita un evento de los favoritos del usuario. |
-| `GET` | `/api/eventos` | Busca, filtra (`texto`, `categoriaId`, `categoriaIds`, `organizadorId`, `precioMin`, `precioMax`), ordena (`ordenarPor=precio\|fecha\|puntaje`, `direccion=asc\|desc`) y pagina (`page`, `limit`) eventos. |
-| `GET` | `/api/eventos/:id` | Obtiene el detalle de un evento incluyendo puntaje y reseñas previas del organizador. |
-| `POST` | `/api/eventos` | Publica un nuevo evento con sus tipos de entrada, precios y cupos. |
-| `GET` | `/api/eventos/:eventoId/compras` | **(Vista Organizador)** Devuelve las compras del evento agrupadas por estado y los cupos disponibles por tipo de entrada. |
+| `GET` | `/api/eventos` | Busca, filtra (`texto`, `categoriaId`, `categoriaIds`, `organizadorId`, `precioMin`, `precioMax`, `soloFuturos`, `soloConCupo`), ordena (`ordenarPor=precio\|fecha\|puntaje`, `direccion=asc\|desc`) y pagina (`page`, `limit`) eventos. |
+| `GET` | `/api/eventos/:id` | Obtiene el detalle de un evento incluyendo cupo disponible, indicador `agotado`, puntaje y reseñas previas del organizador. |
+| `POST` | `/api/eventos` | Publica un nuevo evento futuro con sus tipos de entrada, precios y cupos. |
+| `GET` | `/api/eventos/:eventoId/compras` | **(Vista Organizador)** Devuelve métricas (`recaudacionTotal`, `entradasVendidas`, `capacidadTotal`, `porcentajeOcupacion`), las compras agrupadas por estado y los cupos disponibles por tipo de entrada. |
 | `GET` | `/api/compras` | Lista compras filtrando por `compradorId` (*Mis Compras*) o por `eventoId` y `organizadorId`. |
 | `GET` | `/api/compras/:id` | Obtiene el detalle de una compra, su historial de estados, días faltantes y mensajes. |
 | `POST` | `/api/compras` | Realiza una compra de entradas validando y descontando el cupo disponible. |

@@ -19,7 +19,7 @@ app.use(
     })
 );
 app.use(morgan("dev"));
-app.use(express.json());
+app.use(express.json({ limit: "100kb" }));
 
 // Documentación interactiva Swagger / OpenAPI 3.0
 app.get("/api-docs.json", (req, res) => {
@@ -50,6 +50,14 @@ app.post("/api/seed", (req, res) => {
 });
 
 app.use("/api", apiRouter);
+
+// Handler JSON para rutas inexistentes (404)
+app.use((req, res) => {
+    res.status(404).json({
+        tipo: "RouteNotFoundError",
+        error: `La ruta ${req.method} ${req.originalUrl} no existe`
+    });
+});
 
 app.use(errorHandler);
 

@@ -21,6 +21,11 @@ export class ReseniaRepository {
         return this.resenias.filter((r) => r.evento?.organizador?.id === organizadorId);
     }
 
+    findByCompraId(compraId) {
+        if (!compraId) return null;
+        return this.resenias.find((r) => r.compraId === compraId) || null;
+    }
+
     save(resenia) {
         if (!resenia) {
             throw new Error("Se debe proporcionar una reseña válida");

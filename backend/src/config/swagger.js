@@ -137,6 +137,8 @@ export const swaggerSpec = {
                     },
                     organizador: { $ref: "#/components/schemas/Usuario" },
                     precioMinimo: { type: "number", example: 25000 },
+                    cupoTotalDisponible: { type: "integer", example: 228 },
+                    agotado: { type: "boolean", example: false },
                     puntajeOrganizador: { type: "number", example: 4.5 },
                     reseniasOrganizador: {
                         type: "array",
@@ -211,6 +213,7 @@ export const swaggerSpec = {
                         description: "Cantidad de días hasta el evento si el estado es CONFIRMADA; null en otros estados."
                     },
                     puedeCancelarse: { type: "boolean", example: true },
+                    yaFueReseniada: { type: "boolean", example: false },
                     puedeSerReseniada: { type: "boolean", example: false },
                     cambiosEstado: {
                         type: "array",
@@ -581,6 +584,18 @@ export const swaggerSpec = {
                         schema: { type: "number" }
                     },
                     {
+                        name: "soloFuturos",
+                        in: "query",
+                        description: "Si es true, devuelve únicamente eventos que aún no ocurrieron",
+                        schema: { type: "boolean" }
+                    },
+                    {
+                        name: "soloConCupo",
+                        in: "query",
+                        description: "Si es true, excluye eventos agotados (Sold Out)",
+                        schema: { type: "boolean" }
+                    },
+                    {
                         name: "ordenarPor",
                         in: "query",
                         description: "Criterio de ordenamiento: precio, fecha o puntaje del organizador",
@@ -693,7 +708,7 @@ export const swaggerSpec = {
                 ],
                 responses: {
                     200: {
-                        description: "Resumen de ventas por estado y cupos disponibles por tipo de entrada"
+                        description: "Resumen de ventas por estado, métricas financieras/ocupación y cupos disponibles por tipo de entrada"
                     },
                     403: { description: "El usuario indicado no es el organizador del evento" },
                     404: { description: "Evento no encontrado" }

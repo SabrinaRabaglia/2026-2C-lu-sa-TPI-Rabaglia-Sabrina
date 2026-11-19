@@ -4,7 +4,7 @@ import {
 } from "./errors.js";
 
 export class Resenia {
-    constructor({ id = null, comprador, evento, detalle = "", puntuacion }) {
+    constructor({ id = null, compraId = null, comprador, evento, detalle = "", puntuacion }) {
         if (!comprador) {
             throw new DatosDominioInvalidosError("El comprador de la reseña es obligatorio");
         }
@@ -16,6 +16,7 @@ export class Resenia {
         }
 
         this.id = id;
+        this.compraId = compraId;
         this.comprador = comprador;
         this.evento = evento;
         this.detalle = typeof detalle === "string" ? detalle.trim() : "";

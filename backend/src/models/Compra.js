@@ -78,19 +78,28 @@ export class Compra {
         return this.evento.diasParaElEvento(fechaReferencia);
     }
 
-    puedeSerReseniada() {
-        return this.estado === EstadoCompra.UTILIZADA;
+    puedeSerReseniada(yaFueReseniada = false) {
+        return this.estado === EstadoCompra.UTILIZADA && !yaFueReseniada;
+    }
+
+    esComprador(usuario) {
+        if (!usuario) return false;
+        return (
+            usuario === this.comprador ||
+            (usuario?.id !== null && usuario?.id !== undefined && usuario?.id === this.comprador?.id)
+        );
+    }
+
+    esOrganizadorDelEvento(usuario) {
+        if (!usuario || !this.evento?.organizador) return false;
+        return (
+            usuario === this.evento.organizador ||
+            (usuario?.id !== null && usuario?.id !== undefined && usuario?.id === this.evento.organizador?.id)
+        );
     }
 
     esParticipanteDelChat(usuario) {
-        if (!usuario) return false;
-        const mismoUsuario = (u1, u2) =>
-            u1 === u2 || (u1?.id !== null && u1?.id !== undefined && u1?.id === u2?.id);
-
-        return (
-            mismoUsuario(usuario, this.comprador) ||
-            mismoUsuario(usuario, this.evento.organizador)
-        );
+        return this.esComprador(usuario) || this.esOrganizadorDelEvento(usuario);
     }
 
     agregarMensaje(usuario, texto, fecha = new Date()) {

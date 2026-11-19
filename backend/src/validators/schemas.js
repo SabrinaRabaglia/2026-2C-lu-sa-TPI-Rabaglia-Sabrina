@@ -18,14 +18,19 @@ export const crearEventoSchema = z.object({
     nombre: z.string({ error: "El campo 'nombre' es obligatorio" }).min(1, "El nombre no puede estar vacío"),
     descripcion: z.string().optional(),
     categoriaId: z.string({ error: "El campo 'categoriaId' es obligatorio" }).min(1),
-    fecha: z.string({ error: "El campo 'fecha' es obligatorio" }).min(1),
+    fecha: z
+        .string({ error: "El campo 'fecha' es obligatorio" })
+        .min(1)
+        .refine((val) => !Number.isNaN(Date.parse(val)), {
+            message: "La fecha debe tener un formato válido (ej. ISO 8601)"
+        }),
     tiposEntrada: z
         .array(
             z.object({
-                nombre: z.string().min(1),
+                nombre: z.string().min(1, "El nombre del tipo de entrada es obligatorio"),
                 descripcion: z.string().optional(),
-                precio: z.number(),
-                cupo: z.number().int()
+                precio: z.number({ error: "El precio debe ser numérico" }).nonnegative("El precio no puede ser negativo"),
+                cupo: z.number({ error: "El cupo debe ser numérico" }).int("El cupo debe ser un número entero").positive("El cupo inicial debe ser mayor a 0")
             })
         )
         .min(1, "Se debe incluir al menos un tipo de entrada"),
@@ -37,7 +42,11 @@ export const crearCompraSchema = z.object({
     compradorId: z.string({ error: "El campo 'compradorId' es obligatorio" }).min(1),
     eventoId: z.string({ error: "El campo 'eventoId' es obligatorio" }).min(1),
     tipoEntradaId: z.string({ error: "El campo 'tipoEntradaId' es obligatorio" }).min(1),
-    cantidad: z.number({ error: "El campo 'cantidad' debe ser numérico" }).int()
+    cantidad: z
+        .number({ error: "El campo 'cantidad' debe ser numérico" })
+        .int("La cantidad debe ser un número entero")
+        .positive("La cantidad debe ser mayor a 0"),
+    estadoInicial: z.enum(["PENDIENTE", "CONFIRMADA"]).optional()
 });
 
 export const actualizarEstadoCompraSchema = z.object({
@@ -56,6 +65,9 @@ export const crearMensajeSchema = z.object({
 export const crearReseniaSchema = z.object({
     compraId: z.string({ error: "El campo 'compraId' es obligatorio" }).min(1),
     compradorId: z.string().optional(),
-    puntuacion: z.number({ error: "El campo 'puntuacion' debe ser numérico" }),
+    puntuacion: z
+        .number({ error: "El campo 'puntuacion' debe ser numérico" })
+        .min(1, "La puntuación mínima es 1")
+        .max(5, "La puntuación máxima es 5"),
     detalle: z.string().optional()
 });

@@ -1,4 +1,4 @@
-import { Evento, TipoEntrada } from "../models/index.js";
+import { Evento, TipoEntrada, FechaEventoInvalidaError } from "../models/index.js";
 import {
     eventoRepository as defaultEventoRepo,
     categoriaRepository as defaultCategoriaRepo,
@@ -55,6 +55,8 @@ export class EventoService {
             multimedia: evento.multimedia,
             organizador: evento.organizador,
             precioMinimo: evento.precioMinimo(),
+            cupoTotalDisponible: evento.cupoTotalDisponible(),
+            agotado: evento.estaAgotado(),
             puntajeOrganizador,
             reseniasOrganizador
         };
@@ -99,13 +101,17 @@ export class EventoService {
         organizadorId = null,
         precioMin = null,
         precioMax = null,
+        soloFuturos = false,
+        soloConCupo = false,
         ordenarPor = null,
         direccion = null,
         page = null,
         limit = null
-    } = {}) {
+    } = {}, fechaReferencia = new Date()) {
         const min = precioMin !== null && precioMin !== "" ? Number(precioMin) : null;
         const max = precioMax !== null && precioMax !== "" ? Number(precioMax) : null;
+        const filtrarFuturos = soloFuturos === true || soloFuturos === "true";
+        const filtrarConCupo = soloConCupo === true || soloConCupo === "true";
 
         let eventosFiltrados = this.eventoRepository.buscar({
             texto,
@@ -119,6 +125,14 @@ export class EventoService {
             eventosFiltrados = eventosFiltrados.filter(
                 (ev) => ev.organizador?.id === organizadorId
             );
+        }
+
+        if (filtrarFuturos) {
+            eventosFiltrados = eventosFiltrados.filter((ev) => !ev.yaOcurrio(fechaReferencia));
+        }
+
+        if (filtrarConCupo) {
+            eventosFiltrados = eventosFiltrados.filter((ev) => !ev.estaAgotado());
         }
 
         const enriquecidos = eventosFiltrados.map((ev) => this.enriquecerEvento(ev));
@@ -176,6 +190,11 @@ export class EventoService {
 
         if (!Array.isArray(tiposEntrada) || tiposEntrada.length === 0) {
             throw new EventoSinTiposEntradaError();
+        }
+
+        const fechaParsed = fecha instanceof Date ? fecha : new Date(fecha);
+        if (!Number.isNaN(fechaParsed.getTime()) && fechaParsed.getTime() <= Date.now()) {
+            throw new FechaEventoInvalidaError();
         }
 
         const instanciasTipos = tiposEntrada.map((t) => {

@@ -7,7 +7,11 @@ import {
     CancelacionCompraInvalidaError,
     CompraNoReseniableError,
     UsuarioNoParticipanteDelChatError,
-    PuntuacionInvalidaError
+    PuntuacionInvalidaError,
+    EventoFinalizadoError,
+    AutoCompraNoPermitidaError,
+    CompraYaReseniadaError,
+    FechaEventoInvalidaError
 } from "../models/index.js";
 import {
     ServiceError,
@@ -72,7 +76,10 @@ export function errorHandler(err, req, res, next) {
     if (
         err instanceof CupoInsuficienteError ||
         err instanceof CancelacionCompraInvalidaError ||
-        err instanceof CompraNoReseniableError
+        err instanceof CompraNoReseniableError ||
+        err instanceof EventoFinalizadoError ||
+        err instanceof AutoCompraNoPermitidaError ||
+        err instanceof CompraYaReseniadaError
     ) {
         return res.status(409).json({
             tipo: err.name,
@@ -84,6 +91,7 @@ export function errorHandler(err, req, res, next) {
         err instanceof DatosDominioInvalidosError ||
         err instanceof EstadoCompraInvalidoError ||
         err instanceof PuntuacionInvalidaError ||
+        err instanceof FechaEventoInvalidaError ||
         err instanceof DomainError
     ) {
         return res.status(422).json({

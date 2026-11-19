@@ -97,7 +97,20 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         });
         assert.equal(resCompra.status, 201);
         const compra = await resCompra.json();
-        assert.equal(compra.estado, "CONFIRMADA");
+        assert.equal(compra.estado, "PENDIENTE");
+
+        // Pago simulado: PENDIENTE -> CONFIRMADA
+        const resPay = await fetch(`${baseUrl}/compras/${compra.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                estado: "CONFIRMADA",
+                usuarioId: compLucia.id
+            })
+        });
+        assert.equal(resPay.status, 200);
+        const compraPagada = await resPay.json();
+        assert.equal(compraPagada.estado, "CONFIRMADA");
 
         const resMsg = await fetch(`${baseUrl}/compras/${compra.id}/mensajes`, {
             method: "POST",
@@ -114,6 +127,7 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         const mensajes = await resGetMsgs.json();
         assert.equal(mensajes.length, 1);
 
+        // Cancelar compra CONFIRMADA -> REEMBOLSADA
         const resDelete = await fetch(`${baseUrl}/compras/${compra.id}`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
@@ -122,6 +136,18 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         assert.equal(resDelete.status, 200);
         const cancelada = await resDelete.json();
         assert.equal(cancelada.estado, "REEMBOLSADA");
+
+        // Cancelar compra PENDIENTE (del seed) -> CANCELADA
+        const [, compraPendiente] = seedData.compras;
+        const [, , , compMateo] = seedData.usuarios;
+        const resDeletePendiente = await fetch(`${baseUrl}/compras/${compraPendiente.id}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuarioId: compMateo.id })
+        });
+        assert.equal(resDeletePendiente.status, 200);
+        const canceladaPendiente = await resDeletePendiente.json();
+        assert.equal(canceladaPendiente.estado, "CANCELADA");
     });
 
     it("POST /api/resenias y GET /api/resenias deben crear y consultar reseñas", async () => {
@@ -162,6 +188,8 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         const bodyVentas = await resVentas.json();
         assert.equal(bodyVentas.eventoId, evFestivalRock.id);
         assert.equal(bodyVentas.disponibilidadEntradas.length, 3);
+        assert.equal(bodyVentas.metricas.recaudacionTotal, 50000);
+        assert.equal(bodyVentas.metricas.entradasVendidas, 2);
     });
 
     it("POST y DELETE /api/usuarios/:id/favoritos deben gestionar favoritos de forma RESTful", async () => {
@@ -234,5 +262,88 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         assert.equal(resUi.status, 200);
         const html = await resUi.text();
         assert.ok(html.includes("swagger-ui"));
+    });
+
+    it("Seguridad y validaciones extra en API REST: rutas 404 en JSON, Zod estricto (400), permisos (403), conflictos (409) y soloFuturos", async () => {
+        const [orgRock, , compLucia, compMateo] = seedData.usuarios;
+        const [evFestivalRock, , , evAcusticoPasado] = seedData.eventos;
+        const [compraConfirmada, , compraUtilizada] = seedData.compras;
+
+        // Ruta inexistente devuelve JSON 404 estructurado
+        const resRuta404 = await fetch(`${baseUrl}/ruta-que-no-existe`);
+        assert.equal(resRuta404.status, 404);
+        const body404 = await resRuta404.json();
+        assert.equal(body404.tipo, "RouteNotFoundError");
+
+        // Zod rechaza cantidad <= 0 (400)
+        const resCantidadInvalida = await fetch(`${baseUrl}/compras`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                compradorId: compLucia.id,
+                eventoId: evFestivalRock.id,
+                tipoEntradaId: evFestivalRock.tiposEntrada[0].id,
+                cantidad: 0
+            })
+        });
+        assert.equal(resCantidadInvalida.status, 400);
+
+        // Auto-compra rechazada con 409
+        const resAutoCompra = await fetch(`${baseUrl}/compras`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                compradorId: orgRock.id,
+                eventoId: evFestivalRock.id,
+                tipoEntradaId: evFestivalRock.tiposEntrada[0].id,
+                cantidad: 1
+            })
+        });
+        assert.equal(resAutoCompra.status, 409);
+        assert.equal((await resAutoCompra.json()).tipo, "AutoCompraNoPermitidaError");
+
+        // Compra en evento pasado rechazada con 409
+        const resEventoPasado = await fetch(`${baseUrl}/compras`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                compradorId: compMateo.id,
+                eventoId: evAcusticoPasado.id,
+                tipoEntradaId: evAcusticoPasado.tiposEntrada[0].id,
+                cantidad: 1
+            })
+        });
+        assert.equal(resEventoPasado.status, 409);
+        assert.equal((await resEventoPasado.json()).tipo, "EventoFinalizadoError");
+
+        // Comprador intentando marcar su entrada como UTILIZADA -> 403
+        const resCheckInIlegal = await fetch(`${baseUrl}/compras/${compraConfirmada.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ estado: "UTILIZADA", usuarioId: compLucia.id })
+        });
+        assert.equal(resCheckInIlegal.status, 403);
+
+        // Reseña duplicada sobre la misma compra -> 201 y luego 409
+        const resResenia1 = await fetch(`${baseUrl}/resenias`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ compraId: compraUtilizada.id, compradorId: compLucia.id, puntuacion: 5 })
+        });
+        assert.equal(resResenia1.status, 201);
+
+        const resResenia2 = await fetch(`${baseUrl}/resenias`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ compraId: compraUtilizada.id, compradorId: compLucia.id, puntuacion: 4 })
+        });
+        assert.equal(resResenia2.status, 409);
+        assert.equal((await resResenia2.json()).tipo, "CompraYaReseniadaError");
+
+        // Filtro soloFuturos=true
+        const resFuturos = await fetch(`${baseUrl}/eventos?soloFuturos=true`);
+        assert.equal(resFuturos.status, 200);
+        const eventosFuturos = await resFuturos.json();
+        assert.equal(eventosFuturos.length, 3);
     });
 });

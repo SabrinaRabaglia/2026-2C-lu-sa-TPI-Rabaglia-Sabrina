@@ -1,6 +1,13 @@
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { EstadoCompra, CompraNoReseniableError } from "../src/models/index.js";
+import {
+    EstadoCompra,
+    CompraNoReseniableError,
+    EventoFinalizadoError,
+    AutoCompraNoPermitidaError,
+    CompraYaReseniadaError,
+    FechaEventoInvalidaError
+} from "../src/models/index.js";
 import { repositories } from "../src/repositories/index.js";
 import { seedDatabase } from "../src/data/seed.js";
 import {
@@ -9,7 +16,8 @@ import {
     eventoService,
     compraService,
     reseniaService,
-    ConflictoEntidadError
+    ConflictoEntidadError,
+    OperacionNoAutorizadaError
 } from "../src/services/index.js";
 
 describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () => {
@@ -85,12 +93,22 @@ describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () 
             cantidad: 2
         });
 
-        assert.equal(compra.estado, EstadoCompra.CONFIRMADA);
+        assert.equal(compra.estado, EstadoCompra.PENDIENTE);
         assert.equal(compra.total, tipoVip.precio * 2);
         assert.equal(tipoVip.cupo, cupoInicial - 2);
-        assert.ok(compra.diasFaltantesParaEvento > 0);
+        assert.equal(compra.diasFaltantesParaEvento, null);
         assert.equal(compra.cambiosEstado.length, 1);
-        assert.equal(compra.cambiosEstado[0].estado, EstadoCompra.CONFIRMADA);
+        assert.equal(compra.cambiosEstado[0].estado, EstadoCompra.PENDIENTE);
+
+        // Pago simulado -> CONFIRMADA
+        const compraConfirmada = compraService.actualizarEstadoCompra({
+            compraId: compra.id,
+            estado: EstadoCompra.CONFIRMADA,
+            usuarioId: compLucia.id
+        });
+        assert.equal(compraConfirmada.estado, EstadoCompra.CONFIRMADA);
+        assert.ok(compraConfirmada.diasFaltantesParaEvento > 0);
+        assert.equal(compraConfirmada.cambiosEstado.length, 2);
     });
 
     it("CompraService: debe permitir al organizador ver las compras de un evento diferenciadas por estado y cupos disponibles", () => {
@@ -184,5 +202,106 @@ describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () 
             () => categoriaService.crearCategoria({ nombre: "feria gastronómica" }),
             ConflictoEntidadError
         );
+    });
+
+    it("Reglas de negocio y seguridad extra: fecha futura, no auto-compra, no eventos pasados, no reseña duplicada, permisos y métricas", () => {
+        const [catRecitales] = seedData.categorias;
+        const [orgRock, , compLucia, compMateo] = seedData.usuarios;
+        const [evFestivalRock, , , evAcusticoPasado] = seedData.eventos;
+        const [compraConfirmada, , compraUtilizada] = seedData.compras;
+
+        // 1. No permitir publicar evento con fecha pasada
+        assert.throws(
+            () =>
+                eventoService.crearEvento({
+                    nombre: "Evento del Pasado",
+                    categoriaId: catRecitales.id,
+                    fecha: new Date("2020-01-01T20:00:00Z"),
+                    tiposEntrada: [{ nombre: "General", precio: 1000, cupo: 10 }],
+                    organizadorId: orgRock.id
+                }),
+            FechaEventoInvalidaError
+        );
+
+        // 2. Filtros soloFuturos y soloConCupo + indicadores agotado/cupoTotalDisponible
+        const soloFuturos = eventoService.buscarEventos({ soloFuturos: true, soloConCupo: true });
+        assert.equal(soloFuturos.length, 3);
+        assert.equal(soloFuturos[0].agotado, false);
+        assert.ok(soloFuturos[0].cupoTotalDisponible > 0);
+
+        // 3. No permitir comprar entradas de un evento que ya ocurrió
+        assert.throws(
+            () =>
+                compraService.realizarCompra({
+                    compradorId: compMateo.id,
+                    eventoId: evAcusticoPasado.id,
+                    tipoEntradaId: evAcusticoPasado.tiposEntrada[0].id,
+                    cantidad: 1
+                }),
+            EventoFinalizadoError
+        );
+
+        // 4. No permitir auto-compra del organizador
+        assert.throws(
+            () =>
+                compraService.realizarCompra({
+                    compradorId: orgRock.id,
+                    eventoId: evFestivalRock.id,
+                    tipoEntradaId: evFestivalRock.tiposEntrada[0].id,
+                    cantidad: 1
+                }),
+            AutoCompraNoPermitidaError
+        );
+
+        // 5. Permisos: un tercero no puede cancelar una compra ajena
+        assert.throws(
+            () =>
+                compraService.cancelarCompra({
+                    compraId: compraConfirmada.id,
+                    usuarioId: compMateo.id
+                }),
+            OperacionNoAutorizadaError
+        );
+
+        // 6. Permisos: el comprador no puede marcar su entrada como UTILIZADA (solo el organizador)
+        assert.throws(
+            () =>
+                compraService.actualizarEstadoCompra({
+                    compraId: compraConfirmada.id,
+                    estado: EstadoCompra.UTILIZADA,
+                    usuarioId: compLucia.id
+                }),
+            OperacionNoAutorizadaError
+        );
+
+        // 7. No permitir reseña duplicada sobre la misma compra
+        reseniaService.crearResenia({
+            compraId: compraUtilizada.id,
+            compradorId: compLucia.id,
+            puntuacion: 5,
+            detalle: "Primera calificación"
+        });
+        const compraActualizada = compraService.obtenerCompraPorId(compraUtilizada.id);
+        assert.equal(compraActualizada.yaFueReseniada, true);
+        assert.equal(compraActualizada.puedeSerReseniada, false);
+
+        assert.throws(
+            () =>
+                reseniaService.crearResenia({
+                    compraId: compraUtilizada.id,
+                    compradorId: compLucia.id,
+                    puntuacion: 4,
+                    detalle: "Segunda calificación duplicada"
+                }),
+            CompraYaReseniadaError
+        );
+
+        // 8. Métricas financieras y de ocupación para el organizador
+        const dashboard = compraService.obtenerComprasPorEvento(evFestivalRock.id, orgRock.id);
+        assert.equal(dashboard.metricas.recaudacionTotal, 50000);
+        assert.equal(dashboard.metricas.entradasVendidas, 2);
+        assert.equal(dashboard.metricas.capacidadTotal, 230);
+        assert.ok(dashboard.metricas.porcentajeOcupacion > 0);
+        assert.equal(dashboard.metricas.agotado, false);
     });
 });

@@ -56,3 +56,37 @@ export class PuntuacionInvalidaError extends DomainError {
         super(mensaje);
     }
 }
+
+export class EventoFinalizadoError extends DomainError {
+    constructor(nombreEvento = "") {
+        super(
+            nombreEvento
+                ? `No se pueden comprar entradas para "${nombreEvento}" porque el evento ya se realizó`
+                : "No se pueden comprar entradas para un evento que ya se realizó"
+        );
+    }
+}
+
+export class AutoCompraNoPermitidaError extends DomainError {
+    constructor(
+        mensaje = "El organizador no puede comprar entradas de su propio evento"
+    ) {
+        super(mensaje);
+    }
+}
+
+export class CompraYaReseniadaError extends DomainError {
+    constructor(
+        mensaje = "Esta compra ya fue calificada anteriormente"
+    ) {
+        super(mensaje);
+    }
+}
+
+export class FechaEventoInvalidaError extends DomainError {
+    constructor(
+        mensaje = "La fecha de un evento nuevo debe ser posterior a la fecha actual"
+    ) {
+        super(mensaje);
+    }
+}

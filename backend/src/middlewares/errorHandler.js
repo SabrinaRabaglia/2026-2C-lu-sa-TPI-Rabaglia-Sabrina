@@ -19,7 +19,8 @@ import {
     ConflictoEntidadError,
     OperacionNoAutorizadaError,
     TipoEntradaNoPerteneceAlEventoError,
-    EventoSinTiposEntradaError
+    EventoSinTiposEntradaError,
+    CredencialesInvalidasError
 } from "../services/index.js";
 
 export function errorHandler(err, req, res, next) {
@@ -42,6 +43,13 @@ export function errorHandler(err, req, res, next) {
 
     if (err instanceof ConflictoEntidadError) {
         return res.status(409).json({
+            tipo: err.name,
+            error: err.message
+        });
+    }
+
+    if (err instanceof CredencialesInvalidasError) {
+        return res.status(401).json({
             tipo: err.name,
             error: err.message
         });

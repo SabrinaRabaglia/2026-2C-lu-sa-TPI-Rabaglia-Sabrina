@@ -7,7 +7,23 @@ export const crearCategoriaSchema = z.object({
 
 export const crearUsuarioSchema = z.object({
     nombre: z.string({ error: "El campo 'nombre' es obligatorio" }).min(1, "El nombre no puede estar vacío"),
-    apellido: z.string({ error: "El campo 'apellido' es obligatorio" }).min(1, "El apellido no puede estar vacío")
+    apellido: z.string({ error: "El campo 'apellido' es obligatorio" }).min(1, "El apellido no puede estar vacío"),
+    email: z.string().email("El email no tiene un formato válido").optional(),
+    password: z.string().min(4, "La contraseña debe tener al menos 4 caracteres").optional(),
+    rol: z.enum(["COMPRADOR", "ORGANIZADOR"]).optional()
+});
+
+export const registroUsuarioSchema = z.object({
+    nombre: z.string({ error: "El campo 'nombre' es obligatorio" }).trim().min(2, "El nombre debe tener al menos 2 caracteres"),
+    apellido: z.string({ error: "El campo 'apellido' es obligatorio" }).trim().min(2, "El apellido debe tener al menos 2 caracteres"),
+    email: z.string({ error: "El campo 'email' es obligatorio" }).trim().email("Ingresá un email válido"),
+    password: z.string({ error: "El campo 'password' es obligatorio" }).min(4, "La contraseña debe tener al menos 4 caracteres"),
+    rol: z.enum(["COMPRADOR", "ORGANIZADOR"]).optional()
+});
+
+export const loginUsuarioSchema = z.object({
+    email: z.string({ error: "El campo 'email' es obligatorio" }).trim().email("Ingresá un email válido"),
+    password: z.string({ error: "El campo 'password' es obligatorio" }).min(1, "La contraseña es obligatoria")
 });
 
 export const agregarFavoritoSchema = z.object({

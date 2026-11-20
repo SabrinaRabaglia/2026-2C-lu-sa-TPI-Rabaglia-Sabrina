@@ -1,5 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import { obtenerUsuarioPorId, obtenerUsuarios } from '@/api/usuarios';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  loginUsuario,
+  obtenerUsuarioPorId,
+  obtenerUsuarios,
+  registrarUsuario,
+} from '@/api/usuarios';
 
 export const clavesUsuarios = {
   todos: ['usuarios'],
@@ -20,5 +25,22 @@ export function useUsuario(usuarioId) {
     queryKey: usuarioId ? clavesUsuarios.detalle(usuarioId) : ['usuarios', 'anonimo'],
     queryFn: () => obtenerUsuarioPorId(usuarioId),
     enabled: Boolean(usuarioId),
+  });
+}
+
+export function useLoginUsuario() {
+  return useMutation({
+    mutationFn: loginUsuario,
+  });
+}
+
+export function useRegistrarUsuario() {
+  const clienteQuery = useQueryClient();
+
+  return useMutation({
+    mutationFn: registrarUsuario,
+    onSuccess: async () => {
+      await clienteQuery.invalidateQueries({ queryKey: clavesUsuarios.todos });
+    },
   });
 }

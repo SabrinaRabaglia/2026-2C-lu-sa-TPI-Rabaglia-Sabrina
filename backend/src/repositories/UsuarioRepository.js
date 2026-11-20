@@ -13,6 +13,12 @@ export class UsuarioRepository {
         return this.usuarios.find((u) => u.id === id) || null;
     }
 
+    findByEmail(email) {
+        if (!email || typeof email !== "string") return null;
+        const normalizado = email.trim().toLowerCase();
+        return this.usuarios.find((u) => u.email === normalizado) || null;
+    }
+
     save(usuario) {
         if (!usuario) {
             throw new Error("Se debe proporcionar un usuario válido");

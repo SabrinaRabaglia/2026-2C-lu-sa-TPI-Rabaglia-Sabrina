@@ -1,7 +1,15 @@
 import { DatosDominioInvalidosError } from "./errors.js";
 
 export class Usuario {
-    constructor({ id = null, nombre, apellido, favoritos = [] }) {
+    constructor({
+        id = null,
+        nombre,
+        apellido,
+        email = null,
+        password = null,
+        rol = "COMPRADOR",
+        favoritos = []
+    }) {
         if (!nombre || typeof nombre !== "string" || !nombre.trim()) {
             throw new DatosDominioInvalidosError("El nombre del usuario es obligatorio");
         }
@@ -12,6 +20,9 @@ export class Usuario {
         this.id = id;
         this.nombre = nombre.trim();
         this.apellido = apellido.trim();
+        this.email = typeof email === "string" && email.trim() ? email.trim().toLowerCase() : null;
+        this.password = typeof password === "string" ? password : null;
+        this.rol = rol === "ORGANIZADOR" ? "ORGANIZADOR" : "COMPRADOR";
         this.favoritos = Array.isArray(favoritos) ? [...favoritos] : [];
     }
 

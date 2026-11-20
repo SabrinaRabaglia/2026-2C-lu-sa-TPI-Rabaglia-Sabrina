@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Dimensions,
   FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { Image } from 'expo-image';
@@ -28,13 +28,16 @@ import { bordes, colores, espaciado, sombras, tipografia } from '@/tema';
 
 const IMAGEN_POR_DEFECTO =
   'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=900&q=80';
-const ANCHO_PANTALLA = Dimensions.get('window').width;
 
 export default function PantallaDetalleEvento() {
   const { id } = useLocalSearchParams();
   const enrutador = useRouter();
   const { usuarioId } = useSesion();
+  const { width: anchoVentana } = useWindowDimensions();
+  const [anchoCarrusel, setAnchoCarrusel] = useState(0);
   const [mostrarTodasResenias, setMostrarTodasResenias] = useState(false);
+
+  const anchoEfectivo = anchoCarrusel > 0 ? anchoCarrusel : anchoVentana;
 
   const consultaEvento = useEvento(id);
   const consultaFavoritos = useFavoritos(usuarioId);
@@ -80,21 +83,37 @@ export default function PantallaDetalleEvento() {
   return (
     <View style={estilos.pantalla}>
       <ScrollView contentContainerStyle={estilos.contenidoScroll}>
-        <View style={estilos.contenedorCarrusel}>
-          <FlatList
-            data={imagenes}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(uri, indice) => `${uri}-${indice}`}
-            renderItem={({ item }) => (
-              <Image
-                source={{ uri: item }}
-                style={estilos.imagenCarrusel}
-                contentFit="cover"
-              />
-            )}
-          />
+        <View
+          style={estilos.contenedorCarrusel}
+          onLayout={(e) => {
+            const nuevoAncho = e.nativeEvent.layout.width;
+            if (nuevoAncho > 0 && nuevoAncho !== anchoCarrusel) {
+              setAnchoCarrusel(nuevoAncho);
+            }
+          }}
+        >
+          {imagenes.length === 1 ? (
+            <Image
+              source={{ uri: imagenes[0] }}
+              style={estilos.imagenCompleta}
+              contentFit="cover"
+            />
+          ) : (
+            <FlatList
+              data={imagenes}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(uri, indice) => `${uri}-${indice}`}
+              renderItem={({ item }) => (
+                <Image
+                  source={{ uri: item }}
+                  style={{ width: anchoEfectivo, height: 260 }}
+                  contentFit="cover"
+                />
+              )}
+            />
+          )}
 
           <Pressable
             onPress={() =>
@@ -294,13 +313,14 @@ const estilos = StyleSheet.create({
     paddingBottom: 110,
   },
   contenedorCarrusel: {
-    height: 240,
+    width: '100%',
+    height: 260,
     position: 'relative',
     backgroundColor: colores.borde,
   },
-  imagenCarrusel: {
-    width: ANCHO_PANTALLA,
-    height: 240,
+  imagenCompleta: {
+    width: '100%',
+    height: '100%',
   },
   botonFavorito: {
     position: 'absolute',

@@ -29,7 +29,7 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         const resList = await fetch(`${baseUrl}/categorias`);
         assert.equal(resList.status, 200);
         const categorias = await resList.json();
-        assert.equal(categorias.length, 4);
+        assert.equal(categorias.length, 6);
 
         const resCreate = await fetch(`${baseUrl}/categorias`, {
             method: "POST",
@@ -51,15 +51,15 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         const [catRecitales, catTeatro, catConferencias] = seedData.categorias;
         const [orgRock] = seedData.usuarios;
 
-        // Filtro por múltiples categorías + paginación
+        // Filtro por múltiples categorías (Recitales: 3 + Teatro: 2 = 5 eventos) + paginación
         const resMultiCatPage = await fetch(
             `${baseUrl}/eventos?categoriaIds=${catRecitales.id},${catTeatro.id}&page=1&limit=2`
         );
         assert.equal(resMultiCatPage.status, 200);
         const paginado = await resMultiCatPage.json();
         assert.equal(paginado.items.length, 2);
-        assert.equal(paginado.pagination.total, 3);
-        assert.equal(paginado.pagination.totalPages, 2);
+        assert.equal(paginado.pagination.total, 5);
+        assert.equal(paginado.pagination.totalPages, 3);
         assert.equal(paginado.pagination.hasNextPage, true);
 
         const resPost = await fetch(`${baseUrl}/eventos`, {
@@ -188,8 +188,8 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         const bodyVentas = await resVentas.json();
         assert.equal(bodyVentas.eventoId, evFestivalRock.id);
         assert.equal(bodyVentas.disponibilidadEntradas.length, 3);
-        assert.equal(bodyVentas.metricas.recaudacionTotal, 50000);
-        assert.equal(bodyVentas.metricas.entradasVendidas, 2);
+        assert.equal(bodyVentas.metricas.recaudacionTotal, 140000);
+        assert.equal(bodyVentas.metricas.entradasVendidas, 4);
     });
 
     it("POST y DELETE /api/usuarios/:id/favoritos deben gestionar favoritos de forma RESTful", async () => {
@@ -340,10 +340,61 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
         assert.equal(resResenia2.status, 409);
         assert.equal((await resResenia2.json()).tipo, "CompraYaReseniadaError");
 
-        // Filtro soloFuturos=true
+        // Filtro soloFuturos=true (10 eventos futuros de los 12 totales)
         const resFuturos = await fetch(`${baseUrl}/eventos?soloFuturos=true`);
         assert.equal(resFuturos.status, 200);
         const eventosFuturos = await resFuturos.json();
-        assert.equal(eventosFuturos.length, 3);
+        assert.equal(eventosFuturos.length, 10);
+
+        // Registro y Login de usuario
+        const resReg = await fetch(`${baseUrl}/usuarios/registro`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                nombre: "Sabrina",
+                apellido: "Rabaglia",
+                email: "sabrina@utn.edu.ar",
+                password: "miPassword123",
+                rol: "COMPRADOR"
+            })
+        });
+        assert.equal(resReg.status, 201);
+        const usuarioRegistrado = await resReg.json();
+        assert.equal(usuarioRegistrado.email, "sabrina@utn.edu.ar");
+
+        // Email duplicado -> 409
+        const resRegDuplicado = await fetch(`${baseUrl}/usuarios/registro`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                nombre: "Otra",
+                apellido: "Persona",
+                email: "sabrina@utn.edu.ar",
+                password: "miPassword123"
+            })
+        });
+        assert.equal(resRegDuplicado.status, 409);
+
+        // Login exitoso -> 200
+        const resLoginOk = await fetch(`${baseUrl}/usuarios/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: "sabrina@utn.edu.ar",
+                password: "miPassword123"
+            })
+        });
+        assert.equal(resLoginOk.status, 200);
+
+        // Login con contraseña incorrecta -> 401
+        const resLoginFail = await fetch(`${baseUrl}/usuarios/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: "sabrina@utn.edu.ar",
+                password: "wrongPassword"
+            })
+        });
+        assert.equal(resLoginFail.status, 401);
     });
 });

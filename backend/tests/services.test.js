@@ -62,20 +62,20 @@ describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () 
         const porPuntajeDesc = eventoService.buscarEventos({ ordenarPor: "puntaje" });
         assert.ok(porPuntajeDesc[0].puntajeOrganizador >= porPuntajeDesc[porPuntajeDesc.length - 1].puntajeOrganizador);
 
-        // Filtrado por múltiples categorías (Recitales y Teatro)
+        // Filtrado por múltiples categorías (Teatro y Conferencias)
         const [catRecitales, catTeatro, catConferencias] = seedData.categorias;
         const multiCategoria = eventoService.buscarEventos({
             categoriaIds: `${catTeatro.id},${catConferencias.id}`
         });
-        assert.equal(multiCategoria.length, 2);
+        assert.equal(multiCategoria.length, 4);
 
-        // Paginación de eventos
-        const pagina1 = eventoService.buscarEventos({ ordenarPor: "precio", direccion: "asc", page: 1, limit: 2 });
-        assert.equal(pagina1.items.length, 2);
+        // Paginación de eventos (12 eventos totales -> 3 páginas de 4)
+        const pagina1 = eventoService.buscarEventos({ ordenarPor: "precio", direccion: "asc", page: 1, limit: 4 });
+        assert.equal(pagina1.items.length, 4);
         assert.equal(pagina1.pagination.page, 1);
-        assert.equal(pagina1.pagination.limit, 2);
-        assert.equal(pagina1.pagination.total, 4);
-        assert.equal(pagina1.pagination.totalPages, 2);
+        assert.equal(pagina1.pagination.limit, 4);
+        assert.equal(pagina1.pagination.total, 12);
+        assert.equal(pagina1.pagination.totalPages, 3);
         assert.equal(pagina1.pagination.hasNextPage, true);
         assert.equal(pagina1.pagination.hasPrevPage, false);
     });
@@ -118,7 +118,7 @@ describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () 
         const vistaOrganizador = compraService.obtenerComprasPorEvento(evFestivalRock.id, orgRock.id);
 
         assert.equal(vistaOrganizador.eventoId, evFestivalRock.id);
-        assert.equal(vistaOrganizador.resumenPorEstado[EstadoCompra.CONFIRMADA].length, 1);
+        assert.equal(vistaOrganizador.resumenPorEstado[EstadoCompra.CONFIRMADA].length, 2);
         assert.equal(vistaOrganizador.disponibilidadEntradas.length, 3);
     });
 
@@ -224,8 +224,9 @@ describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () 
         );
 
         // 2. Filtros soloFuturos y soloConCupo + indicadores agotado/cupoTotalDisponible
+        // De los 12 eventos del seed: 2 ya ocurrieron y 1 futuro está agotado (Final Básquet) -> quedan 9 futuros con cupo
         const soloFuturos = eventoService.buscarEventos({ soloFuturos: true, soloConCupo: true });
-        assert.equal(soloFuturos.length, 3);
+        assert.equal(soloFuturos.length, 9);
         assert.equal(soloFuturos[0].agotado, false);
         assert.ok(soloFuturos[0].cupoTotalDisponible > 0);
 
@@ -296,10 +297,10 @@ describe("Capa de Servicios (Orquestación de Casos de Uso) - AI Ticket It", () 
             CompraYaReseniadaError
         );
 
-        // 8. Métricas financieras y de ocupación para el organizador
+        // 8. Métricas financieras y de ocupación para el organizador (Lucía 2x25000 + Valentina 2x45000 = 140000)
         const dashboard = compraService.obtenerComprasPorEvento(evFestivalRock.id, orgRock.id);
-        assert.equal(dashboard.metricas.recaudacionTotal, 50000);
-        assert.equal(dashboard.metricas.entradasVendidas, 2);
+        assert.equal(dashboard.metricas.recaudacionTotal, 140000);
+        assert.equal(dashboard.metricas.entradasVendidas, 4);
         assert.equal(dashboard.metricas.capacidadTotal, 230);
         assert.ok(dashboard.metricas.porcentajeOcupacion > 0);
         assert.equal(dashboard.metricas.agotado, false);

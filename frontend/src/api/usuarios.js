@@ -4,6 +4,20 @@ export function obtenerUsuarios() {
   return peticionApi('/usuarios');
 }
 
+export function registrarUsuario(datos) {
+  return peticionApi('/usuarios/registro', {
+    metodo: 'POST',
+    cuerpo: datos,
+  });
+}
+
+export function loginUsuario({ email, password }) {
+  return peticionApi('/usuarios/login', {
+    metodo: 'POST',
+    cuerpo: { email, password },
+  });
+}
+
 export function obtenerUsuarioPorId(usuarioId) {
   return peticionApi(`/usuarios/${usuarioId}`);
 }

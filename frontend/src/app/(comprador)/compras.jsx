@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { EstadoCarga } from '@/components/EstadoCarga';
 import { EstadoError } from '@/components/EstadoError';
 import { EstadoVacio } from '@/components/EstadoVacio';
@@ -174,6 +175,18 @@ export default function PantallaMisCompras() {
                         diasDesdeBackend={item.diasFaltantesParaEvento}
                       />
                     ) : null}
+                    {item.puedeSerReseniada ? (
+                      <View style={estilos.pastillaCalificar}>
+                        <Ionicons
+                          name="star"
+                          size={12}
+                          color={colores.estrella}
+                        />
+                        <Text style={estilos.textoPastillaCalificar}>
+                          Lista para calificar
+                        </Text>
+                      </View>
+                    ) : null}
                   </View>
 
                   <Text style={estilos.tituloEvento} numberOfLines={1}>
@@ -271,6 +284,20 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     gap: espaciado.xs,
     marginBottom: 2,
+  },
+  pastillaCalificar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colores.advertenciaFondo,
+    paddingHorizontal: espaciado.sm + 2,
+    paddingVertical: espaciado.xs,
+    borderRadius: bordes.completo,
+  },
+  textoPastillaCalificar: {
+    fontSize: tipografia.xs,
+    fontWeight: '700',
+    color: colores.advertencia,
   },
   tituloEvento: {
     fontSize: tipografia.md,

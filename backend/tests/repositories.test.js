@@ -182,14 +182,14 @@ describe("Capa de Repositorios en Memoria - AI Ticket It", () => {
     it("debe poblar todos los repositorios correctamente mediante seedDatabase()", () => {
         const resultado = seedDatabase(repositories);
 
-        assert.equal(repositories.categoriaRepository.findAll().length, 4);
-        assert.equal(repositories.usuarioRepository.findAll().length, 4);
-        assert.equal(repositories.tipoEntradaRepository.findAll().length, 8);
-        assert.equal(repositories.eventoRepository.findAll().length, 4);
-        assert.equal(repositories.compraRepository.findAll().length, 3);
-        assert.equal(repositories.mensajeRepository.findAll().length, 2);
-        assert.equal(repositories.cambioEstadoCompraRepository.findAll().length, 4);
-        assert.equal(repositories.reseniaRepository.findAll().length, 2);
-        assert.equal(resultado.eventos.length, 4);
+        assert.equal(repositories.categoriaRepository.findAll().length, 6);
+        assert.equal(repositories.usuarioRepository.findAll().length, 7);
+        assert.equal(repositories.tipoEntradaRepository.findAll().length, 21);
+        assert.equal(repositories.eventoRepository.findAll().length, 12);
+        assert.equal(repositories.compraRepository.findAll().length, 11);
+        assert.equal(repositories.mensajeRepository.findAll().length, 3);
+        assert.equal(repositories.cambioEstadoCompraRepository.findAll().length, 14);
+        assert.equal(repositories.reseniaRepository.findAll().length, 4);
+        assert.equal(resultado.eventos.length, 12);
     });
 });

@@ -35,6 +35,10 @@ export default function LayoutRaiz() {
           >
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="registro"
+              options={{ title: 'Crear cuenta' }}
+            />
             <Stack.Screen name="(comprador)" options={{ headerShown: false }} />
             <Stack.Screen name="(organizador)" options={{ headerShown: false }} />
             <Stack.Screen

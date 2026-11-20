@@ -30,3 +30,9 @@ export class EventoSinTiposEntradaError extends ServiceError {
         super("El evento debe ofrecer al menos un tipo de entrada");
     }
 }
+
+export class CredencialesInvalidasError extends ServiceError {
+    constructor(mensaje = "Email o contraseña incorrectos") {
+        super(mensaje);
+    }
+}

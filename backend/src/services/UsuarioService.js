@@ -4,7 +4,11 @@ import {
     eventoRepository as defaultEventoRepo,
     reseniaRepository as defaultReseniaRepo
 } from "../repositories/index.js";
-import { EntidadNoEncontradaError } from "./errors.js";
+import {
+    EntidadNoEncontradaError,
+    ConflictoEntidadError,
+    CredencialesInvalidasError
+} from "./errors.js";
 
 export class UsuarioService {
     constructor({
@@ -29,9 +33,34 @@ export class UsuarioService {
         return usuario;
     }
 
-    crearUsuario({ nombre, apellido }) {
-        const usuario = new Usuario({ nombre, apellido });
+    crearUsuario({ nombre, apellido, email = null, password = null, rol = "COMPRADOR" }) {
+        if (email && this.usuarioRepository.findByEmail(email)) {
+            throw new ConflictoEntidadError("Ya existe un usuario registrado con ese email");
+        }
+        const usuario = new Usuario({ nombre, apellido, email, password, rol });
         return this.usuarioRepository.save(usuario);
+    }
+
+    registrarUsuario({ nombre, apellido, email, password, rol = "COMPRADOR" }) {
+        if (this.usuarioRepository.findByEmail(email)) {
+            throw new ConflictoEntidadError("Ya existe un usuario registrado con ese email");
+        }
+        const nuevoUsuario = new Usuario({
+            nombre,
+            apellido,
+            email,
+            password,
+            rol
+        });
+        return this.usuarioRepository.save(nuevoUsuario);
+    }
+
+    autenticarUsuario({ email, password }) {
+        const usuario = this.usuarioRepository.findByEmail(email);
+        if (!usuario || !usuario.password || usuario.password !== password) {
+            throw new CredencialesInvalidasError();
+        }
+        return usuario;
     }
 
     calcularPromedioOrganizador(organizadorId) {

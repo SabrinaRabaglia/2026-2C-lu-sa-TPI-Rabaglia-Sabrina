@@ -246,6 +246,17 @@ npx expo start
 ```
 Escaneá el código QR con la app **Expo Go** (o presioná `a` para abrir en emulador Android / `w` para Web).
 
+### 4. Ejecutar pruebas del Frontend (Jest + React Native Testing Library)
+El frontend incluye **22 pruebas automatizadas** en 4 suites (`frontend/__tests__/`):
+```bash
+cd frontend
+npm test
+```
+- `formato.test.js`: formateo de moneda ARS, fechas `es-AR`, cálculo de días restantes y configuración de los 5 estados de compra.
+- `clienteApi.test.js`: construcción de URLs con query params, endpoints de eventos/compras/usuarios y manejo de `ErrorApi` (HTTP y red).
+- `componentesEventos.test.jsx`: pruebas de interacción en `TarjetaEvento`, `ChipsCategorias`, `SelectorTipoEntrada`, `SelectorCantidad` y `BarraCupo`.
+- `componentesCompras.test.jsx`: pruebas de `InsigniaEstado`, `PastillaDiasFaltantes`, `EstrellasPuntaje`, `BurbujaMensaje` y `EntradaChat`.
+
 ---
 
 ## 🧪 Ejecución de Pruebas Automatizadas

@@ -20,6 +20,16 @@ export class UsuarioController {
         res.status(201).json(nuevoUsuario);
     };
 
+    registrar = (req, res) => {
+        const nuevoUsuario = this.usuarioService.registrarUsuario(req.body);
+        res.status(201).json(nuevoUsuario);
+    };
+
+    login = (req, res) => {
+        const usuarioAutenticado = this.usuarioService.autenticarUsuario(req.body);
+        res.status(200).json(usuarioAutenticado);
+    };
+
     listarFavoritos = (req, res) => {
         const favoritos = this.usuarioService.obtenerFavoritos(req.params.id);
         res.status(200).json(favoritos);

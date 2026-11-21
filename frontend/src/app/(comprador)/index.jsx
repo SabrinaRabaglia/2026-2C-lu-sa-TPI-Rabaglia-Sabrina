@@ -119,7 +119,7 @@ export default function PantallaExplorar() {
               setPagina(1);
             }}
             accessibilityRole="button"
-            accessibilityLabel="Filtrar solo eventos futuros"
+            accessibilityLabel="Solo futuros: filtrar solo eventos próximos"
             accessibilityState={{ selected: soloFuturos }}
             style={[
               estilos.pastillaFiltro,
@@ -129,7 +129,11 @@ export default function PantallaExplorar() {
             <Ionicons
               name={soloFuturos ? 'checkmark-circle' : 'time-outline'}
               size={16}
-              color={soloFuturos ? colores.primario : colores.textoSecundario}
+              color={
+                soloFuturos
+                  ? colores.primarioTextoClaro
+                  : colores.textoSecundario
+              }
             />
             <Text
               style={[
@@ -144,13 +148,13 @@ export default function PantallaExplorar() {
           <Pressable
             onPress={() => setModalOrdenVisible(true)}
             accessibilityRole="button"
-            accessibilityLabel={`Ordenar eventos. Actual: ${opcionOrden.etiqueta}`}
+            accessibilityLabel={`${opcionOrden.etiqueta}. Cambiar ordenamiento`}
             style={estilos.botonOrdenar}
           >
             <Ionicons
               name="swap-vertical-outline"
               size={16}
-              color={colores.primario}
+              color={colores.primarioTextoClaro}
             />
             <Text style={estilos.textoBotonOrdenar} numberOfLines={1}>
               {opcionOrden.etiqueta}
@@ -315,7 +319,7 @@ const estilos = StyleSheet.create({
     color: colores.textoSecundario,
   },
   textoPastillaFiltroActiva: {
-    color: colores.primario,
+    color: colores.primarioTextoClaro,
   },
   botonOrdenar: {
     flex: 1,
@@ -332,7 +336,7 @@ const estilos = StyleSheet.create({
   textoBotonOrdenar: {
     fontSize: tipografia.xs,
     fontWeight: '700',
-    color: colores.primario,
+    color: colores.primarioTextoClaro,
     flexShrink: 1,
   },
   contenidoLista: {

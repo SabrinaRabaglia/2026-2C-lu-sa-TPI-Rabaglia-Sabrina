@@ -23,19 +23,19 @@ import { bordes, colores, espaciado, sombras, tipografia } from '@/tema';
 const PORTADAS_SUGERIDAS = [
   {
     etiqueta: 'Recital / Rock',
-    url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=900&q=80',
+    url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=640&q=70&fm=webp',
   },
   {
     etiqueta: 'Teatro / Stand-up',
-    url: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=900&q=80',
+    url: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=640&q=70&fm=webp',
   },
   {
     etiqueta: 'Conferencia / Tech',
-    url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=80',
+    url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=640&q=70&fm=webp',
   },
   {
     etiqueta: 'Jazz / Acústico',
-    url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=900&q=80',
+    url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=640&q=70&fm=webp',
   },
 ];
 
@@ -382,10 +382,12 @@ export default function PantallaCrearEvento() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={estilos.filaMiniaturas}
           >
-            {imagenes.map((uri) => (
+            {imagenes.map((uri, idx) => (
               <View key={uri} style={estilos.contenedorMiniatura}>
                 <Image
                   source={{ uri }}
+                  alt={`Miniatura de portada ${idx + 1}`}
+                  accessibilityLabel={`Miniatura de portada ${idx + 1}`}
                   style={estilos.imagenMiniatura}
                   contentFit="cover"
                 />

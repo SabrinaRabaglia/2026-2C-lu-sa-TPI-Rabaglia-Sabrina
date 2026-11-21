@@ -27,7 +27,11 @@ export function PastillaDiasFaltantes({ fechaEvento, diasDesdeBackend }) {
       accessibilityRole="text"
       accessibilityLabel={etiqueta}
     >
-      <Ionicons name="calendar-outline" size={13} color={colores.primario} />
+      <Ionicons
+        name="calendar-outline"
+        size={13}
+        color={colores.primarioTextoClaro}
+      />
       <Text style={estilos.texto}>{etiqueta}</Text>
     </View>
   );
@@ -47,6 +51,6 @@ const estilos = StyleSheet.create({
   texto: {
     fontSize: tipografia.xs,
     fontWeight: '700',
-    color: colores.primario,
+    color: colores.primarioTextoClaro,
   },
 });

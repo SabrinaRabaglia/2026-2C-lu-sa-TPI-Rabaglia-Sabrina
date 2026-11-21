@@ -1,6 +1,7 @@
 export const colores = {
   primario: '#952cf7',
   primarioClaro: '#EFEAFF',
+  primarioTextoClaro: '#6B14C7',
   primarioOscuro: '#4318D8',
   textoPrimario: '#FFFFFF',
   fondo: '#F7F7FA',

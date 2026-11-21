@@ -1,12 +1,23 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { EstadoCarga } from '@/components/EstadoCarga';
 import { useSesion } from '@/context/SesionContext';
+import { useBandejaOrganizador } from '@/hooks/useCompras';
 import { colores } from '@/tema';
 
 export default function LayoutTabsOrganizador() {
   const { usuarioId, modo, hidratado } = useSesion();
+  const consultaBandeja = useBandejaOrganizador(
+    modo === 'ORGANIZADOR' ? usuarioId : null
+  );
+
+  const cantidadSinResponder = useMemo(() => {
+    const lista = Array.isArray(consultaBandeja.data)
+      ? consultaBandeja.data
+      : consultaBandeja.data?.items || [];
+    return lista.filter((c) => c.pendienteRespuestaOrganizador).length;
+  }, [consultaBandeja.data]);
 
   if (!hidratado) {
     return <EstadoCarga />;
@@ -43,6 +54,24 @@ export default function LayoutTabsOrganizador() {
           tabBarIcon: ({ focused, size }) => (
             <Ionicons
               name={focused ? 'calendar' : 'calendar-outline'}
+              size={size}
+              color={focused ? colores.primario : colores.textoSecundario}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="mensajes"
+        options={{
+          title: 'Mensajes',
+          tabBarBadge: cantidadSinResponder > 0 ? cantidadSinResponder : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: colores.acento,
+            color: colores.textoPrimario,
+          },
+          tabBarIcon: ({ focused, size }) => (
+            <Ionicons
+              name={focused ? 'chatbubbles' : 'chatbubbles-outline'}
               size={size}
               color={focused ? colores.primario : colores.textoSecundario}
             />

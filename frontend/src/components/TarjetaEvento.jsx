@@ -10,7 +10,7 @@ import {
 import { bordes, colores, espaciado, sombras, tipografia } from '@/tema';
 
 const PORTADA_POR_DEFECTO =
-  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=900&q=80';
+  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=640&q=70&fm=webp';
 
 export function TarjetaEvento({
   evento,
@@ -33,84 +33,85 @@ export function TarjetaEvento({
   const estaAgotado = Boolean(evento?.agotado);
 
   return (
-    <Pressable
-      onPress={alPresionar}
-      accessibilityRole="button"
-      accessibilityLabel={`Ver detalle de ${evento.nombre}`}
-      style={({ pressed }) => [estilos.tarjeta, pressed && estilos.tarjetaPresionada]}
-    >
-      <View style={estilos.contenedorImagen}>
-        <Image
-          source={{ uri: urlPortada }}
-          style={estilos.portada}
-          contentFit="cover"
-          transition={200}
-        />
-        <View style={estilos.filaSuperior}>
-          <View style={estilos.insigniaCategoria}>
-            <Text style={estilos.textoCategoria}>{nombreCategoria}</Text>
-          </View>
-
-          {alAlternarFavorito ? (
-            <Pressable
-              onPress={(e) => {
-                e.stopPropagation?.();
-                alAlternarFavorito();
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={
-                esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos'
-              }
-              style={estilos.botonFavorito}
-            >
-              <Ionicons
-                name={esFavorito ? 'heart' : 'heart-outline'}
-                size={22}
-                color={esFavorito ? colores.acento : colores.texto}
-              />
-            </Pressable>
-          ) : null}
-        </View>
-
-        {estaAgotado ? (
-          <View style={estilos.insigniaAgotado}>
-            <Text style={estilos.textoAgotado}>Agotado</Text>
-          </View>
-        ) : null}
-      </View>
-
-      <View style={estilos.cuerpo}>
-        <Text style={estilos.textoFecha}>{formatearFechaEvento(evento.fecha)}</Text>
-        <Text style={estilos.titulo} numberOfLines={2}>
-          {evento.nombre}
-        </Text>
-
-        <View style={estilos.filaPie}>
-          <View style={estilos.filaOrganizador}>
-            <Ionicons
-              name="person-circle-outline"
-              size={16}
-              color={colores.textoSecundario}
-            />
-            <Text style={estilos.nombreOrganizador} numberOfLines={1}>
-              {nombreOrganizador}
-            </Text>
-            <View style={estilos.insigniaPuntaje}>
-              <Ionicons name="star" size={12} color={colores.estrella} />
-              <Text style={estilos.textoPuntaje}>
-                {puntaje > 0
-                  ? `${puntaje.toFixed(1)} (${cantidadResenias})`
-                  : 'Sin reseñas'}
-              </Text>
+    <View style={estilos.tarjeta}>
+      {/* Tarjeta clicable y botón de favorito son hermanos (no <button> anidado en <button>) */}
+      <Pressable
+        onPress={alPresionar}
+        accessibilityRole="button"
+        style={({ pressed }) => [pressed && estilos.tarjetaPresionada]}
+      >
+        <View style={estilos.contenedorImagen}>
+          <Image
+            source={{ uri: urlPortada }}
+            alt={`Portada de ${evento.nombre}`}
+            accessibilityLabel={`Portada de ${evento.nombre}`}
+            style={estilos.portada}
+            contentFit="cover"
+            transition={200}
+          />
+          <View style={estilos.filaSuperior}>
+            <View style={estilos.insigniaCategoria}>
+              <Text style={estilos.textoCategoria}>{nombreCategoria}</Text>
             </View>
           </View>
 
-          <Text style={estilos.textoPrecio}>
-            Desde {formatearMoneda(precioMinimo)}
-          </Text>
+          {estaAgotado ? (
+            <View style={estilos.insigniaAgotado}>
+              <Text style={estilos.textoAgotado}>Agotado</Text>
+            </View>
+          ) : null}
         </View>
-      </View>
-    </Pressable>
+
+        <View style={estilos.cuerpo}>
+          <Text style={estilos.textoFecha}>{formatearFechaEvento(evento.fecha)}</Text>
+          <Text style={estilos.titulo} numberOfLines={2}>
+            {evento.nombre}
+          </Text>
+
+          <View style={estilos.filaPie}>
+            <View style={estilos.filaOrganizador}>
+              <Ionicons
+                name="person-circle-outline"
+                size={16}
+                color={colores.textoSecundario}
+              />
+              <Text style={estilos.nombreOrganizador} numberOfLines={1}>
+                {nombreOrganizador}
+              </Text>
+              <View style={estilos.insigniaPuntaje}>
+                <Ionicons name="star" size={12} color={colores.estrella} />
+                <Text style={estilos.textoPuntaje}>
+                  {puntaje > 0
+                    ? `${puntaje.toFixed(1)} (${cantidadResenias})`
+                    : 'Sin reseñas'}
+                </Text>
+              </View>
+            </View>
+
+            <Text style={estilos.textoPrecio}>
+              Desde {formatearMoneda(precioMinimo)}
+            </Text>
+          </View>
+        </View>
+      </Pressable>
+
+      {alAlternarFavorito ? (
+        <Pressable
+          onPress={alAlternarFavorito}
+          accessibilityRole="button"
+          accessibilityLabel={
+            esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos'
+          }
+          style={estilos.botonFavorito}
+        >
+          <Ionicons
+            name={esFavorito ? 'heart' : 'heart-outline'}
+            size={22}
+            color={esFavorito ? colores.acento : colores.texto}
+          />
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
@@ -119,6 +120,7 @@ const estilos = StyleSheet.create({
     backgroundColor: colores.superficie,
     borderRadius: bordes.lg,
     overflow: 'hidden',
+    position: 'relative',
     ...sombras.tarjeta,
   },
   tarjetaPresionada: {
@@ -138,13 +140,12 @@ const estilos = StyleSheet.create({
     position: 'absolute',
     top: espaciado.sm,
     left: espaciado.sm,
-    right: espaciado.sm,
+    right: 60,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
   insigniaCategoria: {
-    backgroundColor: 'rgba(20, 20, 31, 0.78)',
+    backgroundColor: 'rgba(20, 20, 31, 0.82)',
     paddingHorizontal: espaciado.md,
     paddingVertical: espaciado.xs + 2,
     borderRadius: bordes.completo,
@@ -155,10 +156,14 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
   },
   botonFavorito: {
+    position: 'absolute',
+    top: espaciado.sm,
+    right: espaciado.sm,
+    zIndex: 10,
     width: 44,
     height: 44,
     borderRadius: bordes.completo,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    backgroundColor: 'rgba(255, 255, 255, 0.94)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -183,7 +188,7 @@ const estilos = StyleSheet.create({
   textoFecha: {
     fontSize: tipografia.xs,
     fontWeight: '700',
-    color: colores.primario,
+    color: colores.primarioTextoClaro,
     textTransform: 'capitalize',
   },
   titulo: {
@@ -222,6 +227,6 @@ const estilos = StyleSheet.create({
   textoPrecio: {
     fontSize: tipografia.sm,
     fontWeight: '700',
-    color: colores.primario,
+    color: colores.primarioTextoClaro,
   },
 });

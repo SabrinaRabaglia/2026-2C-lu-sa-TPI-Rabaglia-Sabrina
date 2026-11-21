@@ -27,7 +27,7 @@ import {
 import { bordes, colores, espaciado, sombras, tipografia } from '@/tema';
 
 const IMAGEN_POR_DEFECTO =
-  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=900&q=80';
+  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=640&q=70&fm=webp';
 
 export default function PantallaDetalleEvento() {
   const { id } = useLocalSearchParams();
@@ -95,6 +95,8 @@ export default function PantallaDetalleEvento() {
           {imagenes.length === 1 ? (
             <Image
               source={{ uri: imagenes[0] }}
+              alt={`Portada de ${evento.nombre}`}
+              accessibilityLabel={`Portada de ${evento.nombre}`}
               style={estilos.imagenCompleta}
               contentFit="cover"
             />
@@ -105,9 +107,11 @@ export default function PantallaDetalleEvento() {
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               keyExtractor={(uri, indice) => `${uri}-${indice}`}
-              renderItem={({ item }) => (
+              renderItem={({ item, index }) => (
                 <Image
                   source={{ uri: item }}
+                  alt={`Imagen ${index + 1} de ${evento.nombre}`}
+                  accessibilityLabel={`Imagen ${index + 1} de ${evento.nombre}`}
                   style={{ width: anchoEfectivo, height: 260 }}
                   contentFit="cover"
                 />
@@ -349,7 +353,7 @@ const estilos = StyleSheet.create({
     borderRadius: bordes.completo,
   },
   textoCategoria: {
-    color: colores.primario,
+    color: colores.primarioTextoClaro,
     fontSize: tipografia.xs,
     fontWeight: '700',
   },

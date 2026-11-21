@@ -22,7 +22,7 @@ import { formatearFechaEvento, formatearMoneda } from '@/lib/formato';
 import { bordes, colores, espaciado, sombras, tipografia } from '@/tema';
 
 const PORTADA_POR_DEFECTO =
-  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=900&q=80';
+  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=640&q=70&fm=webp';
 
 const PESTANIAS_ESTADO = [
   { id: 'TODAS', etiqueta: 'Todas', coincide: () => true },
@@ -162,6 +162,8 @@ export default function PantallaMisCompras() {
               >
                 <Image
                   source={{ uri: portada }}
+                  alt={`Portada de ${item.evento?.nombre || 'evento'}`}
+                  accessibilityLabel={`Portada de ${item.evento?.nombre || 'evento'}`}
                   style={estilos.miniatura}
                   contentFit="cover"
                 />

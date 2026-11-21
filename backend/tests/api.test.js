@@ -396,5 +396,16 @@ describe("API REST (Controllers y Routers) - AI Ticket It", () => {
             })
         });
         assert.equal(resLoginFail.status, 401);
+
+        // Bandeja de mensajes del organizador (compras con mensajes + pendienteRespuestaOrganizador)
+        const resBandeja = await fetch(
+            `${baseUrl}/compras?organizadorId=${orgRock.id}&soloConMensajes=true`
+        );
+        assert.equal(resBandeja.status, 200);
+        const conversaciones = await resBandeja.json();
+        assert.equal(conversaciones.length, 2);
+        // La primera debe ser la de Valentina porque su último mensaje está sin responder por Martín
+        assert.equal(conversaciones[0].pendienteRespuestaOrganizador, true);
+        assert.equal(conversaciones[1].pendienteRespuestaOrganizador, false);
     });
 });

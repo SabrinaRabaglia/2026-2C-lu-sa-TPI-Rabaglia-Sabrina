@@ -21,45 +21,6 @@ import { useSesion } from '@/context/SesionContext';
 import { useLoginUsuario } from '@/hooks/useUsuarios';
 import { bordes, colores, espaciado, sombras, tipografia } from '@/tema';
 
-const CUENTAS_DEMO = [
-  {
-    etiqueta: 'Lucía (Compradora)',
-    email: 'lucia@ticketit.com',
-    password: '123456',
-    modo: 'COMPRADOR',
-  },
-  {
-    etiqueta: 'Mateo (Comprador)',
-    email: 'mateo@ticketit.com',
-    password: '123456',
-    modo: 'COMPRADOR',
-  },
-  {
-    etiqueta: 'Valentina (Compradora)',
-    email: 'valentina@ticketit.com',
-    password: '123456',
-    modo: 'COMPRADOR',
-  },
-  {
-    etiqueta: 'Martín (Organizador)',
-    email: 'martin@ticketit.com',
-    password: '123456',
-    modo: 'ORGANIZADOR',
-  },
-  {
-    etiqueta: 'Sofía (Organizadora)',
-    email: 'sofia@ticketit.com',
-    password: '123456',
-    modo: 'ORGANIZADOR',
-  },
-  {
-    etiqueta: 'Diego (Organizador)',
-    email: 'diego@ticketit.com',
-    password: '123456',
-    modo: 'ORGANIZADOR',
-  },
-];
-
 const esquemaLogin = z.object({
   email: z
     .string({ error: 'Ingresá tu email' })
@@ -82,7 +43,6 @@ export default function PantallaLogin() {
   const {
     control,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(esquemaLogin),
@@ -91,13 +51,6 @@ export default function PantallaLogin() {
       password: '',
     },
   });
-
-  const manejarAutocompletarDemo = (cuenta) => {
-    setErrorServidor('');
-    setValue('email', cuenta.email, { shouldValidate: true });
-    setValue('password', cuenta.password, { shouldValidate: true });
-    setModoSeleccionado(cuenta.modo);
-  };
 
   const alEnviarLogin = async (valores) => {
     setErrorServidor('');
@@ -322,35 +275,6 @@ export default function PantallaLogin() {
               </Pressable>
             </View>
           </View>
-
-          {/* Accesos rápidos para autocompletar usuarios de prueba durante la demo */}
-          <View style={estilos.tarjetaDemo}>
-            <Text style={estilos.tituloDemo}>
-              Cuentas de prueba (tocá para autocompletar)
-            </Text>
-            <View style={estilos.grillaDemo}>
-              {CUENTAS_DEMO.map((cuenta) => (
-                <Pressable
-                  key={cuenta.email}
-                  onPress={() => manejarAutocompletarDemo(cuenta)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Autocompletar ${cuenta.etiqueta}`}
-                  style={estilos.chipDemo}
-                >
-                  <Ionicons
-                    name={
-                      cuenta.modo === 'COMPRADOR'
-                        ? 'ticket-outline'
-                        : 'megaphone-outline'
-                    }
-                    size={14}
-                    color={colores.primario}
-                  />
-                  <Text style={estilos.textoChipDemo}>{cuenta.etiqueta}</Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -371,7 +295,7 @@ const estilos = StyleSheet.create({
   },
   encabezado: {
     alignItems: 'center',
-    paddingTop: espaciado.md,
+    paddingTop: espaciado.xl,
     gap: espaciado.xs,
   },
   insigniaLogo: {
@@ -507,38 +431,6 @@ const estilos = StyleSheet.create({
   enlaceRegistro: {
     fontSize: tipografia.sm,
     fontWeight: '700',
-    color: colores.primario,
-  },
-  tarjetaDemo: {
-    backgroundColor: colores.superficie,
-    borderRadius: bordes.lg,
-    padding: espaciado.md,
-    gap: espaciado.sm,
-    borderWidth: 1,
-    borderColor: colores.borde,
-  },
-  tituloDemo: {
-    fontSize: tipografia.xs,
-    fontWeight: '700',
-    color: colores.textoSecundario,
-  },
-  grillaDemo: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: espaciado.sm,
-  },
-  chipDemo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: colores.primarioClaro,
-    paddingHorizontal: espaciado.md,
-    paddingVertical: espaciado.xs + 2,
-    borderRadius: bordes.completo,
-  },
-  textoChipDemo: {
-    fontSize: tipografia.xs,
-    fontWeight: '600',
-    color: colores.primario,
+    color: colores.primarioTextoClaro,
   },
 });

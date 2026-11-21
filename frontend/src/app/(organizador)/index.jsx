@@ -20,7 +20,7 @@ import { formatearFechaEvento, formatearMoneda } from '@/lib/formato';
 import { bordes, colores, espaciado, sombras, tipografia } from '@/tema';
 
 const PORTADA_POR_DEFECTO =
-  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=900&q=80';
+  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=640&q=70&fm=webp';
 
 export default function PantallaEventosOrganizador() {
   const enrutador = useRouter();
@@ -92,6 +92,8 @@ export default function PantallaEventosOrganizador() {
               >
                 <Image
                   source={{ uri: portada }}
+                  alt={`Portada de ${item.nombre}`}
+                  accessibilityLabel={`Portada de ${item.nombre}`}
                   style={estilos.miniatura}
                   contentFit="cover"
                 />

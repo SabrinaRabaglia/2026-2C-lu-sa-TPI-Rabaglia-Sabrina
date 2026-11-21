@@ -21,7 +21,28 @@ export function useCompras(filtros = {}) {
   return useQuery({
     queryKey: clavesCompras.lista(filtros),
     queryFn: () => obtenerCompras(filtros),
-    enabled: Boolean(filtros.compradorId || filtros.eventoId),
+    enabled: Boolean(
+      filtros.compradorId || filtros.eventoId || filtros.organizadorId
+    ),
+  });
+}
+
+/**
+ * Bandeja de mensajes del organizador con polling cada 5s para notificar consultas nuevas.
+ */
+export function useBandejaOrganizador(organizadorId) {
+  return useQuery({
+    queryKey: clavesCompras.lista({
+      organizadorId,
+      soloConMensajes: 'true',
+    }),
+    queryFn: () =>
+      obtenerCompras({
+        organizadorId,
+        soloConMensajes: 'true',
+      }),
+    enabled: Boolean(organizadorId),
+    refetchInterval: 5000,
   });
 }
 
@@ -172,6 +193,7 @@ export function useEnviarMensaje(compraId) {
     },
     onSettled: async () => {
       await Promise.all([
+        clienteQuery.invalidateQueries({ queryKey: clavesCompras.todas }),
         clienteQuery.invalidateQueries({ queryKey: clavesCompras.mensajes(compraId) }),
         clienteQuery.invalidateQueries({ queryKey: clavesCompras.detalle(compraId) }),
       ]);

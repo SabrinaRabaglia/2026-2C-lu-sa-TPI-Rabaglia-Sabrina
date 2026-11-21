@@ -42,6 +42,13 @@ export class CompraService {
     enriquecerCompra(compra, fechaReferencia = new Date()) {
         const cambiosEstado = this.cambioEstadoCompraRepository.findByCompraId(compra.id);
         const yaFueReseniada = Boolean(this.reseniaRepository.findByCompraId(compra.id));
+        const mensajes = compra.mensajes || [];
+        const ultimoMensaje = mensajes.length > 0 ? mensajes[mensajes.length - 1] : null;
+        const organizadorId = compra.evento?.organizador?.id;
+        const pendienteRespuestaOrganizador = Boolean(
+            ultimoMensaje && organizadorId && ultimoMensaje.usuario?.id !== organizadorId
+        );
+
         return {
             ...compra,
             id: compra.id,
@@ -51,7 +58,9 @@ export class CompraService {
             cantidad: compra.cantidad,
             total: compra.total,
             estado: compra.estado,
-            mensajes: compra.mensajes,
+            mensajes,
+            ultimoMensaje,
+            pendienteRespuestaOrganizador,
             diasFaltantesParaEvento: compra.diasFaltantesParaEvento(fechaReferencia),
             puedeCancelarse: compra.puedeCancelarse(fechaReferencia),
             yaFueReseniada,
@@ -93,19 +102,68 @@ export class CompraService {
     }
 
     listarCompras(
-        { compradorId = null, eventoId = null, organizadorId = null, page = null, limit = null } = {},
+        {
+            compradorId = null,
+            eventoId = null,
+            organizadorId = null,
+            soloConMensajes = false,
+            page = null,
+            limit = null
+        } = {},
         fechaReferencia = new Date()
     ) {
         if (eventoId) {
             return this.obtenerComprasPorEvento(eventoId, organizadorId, fechaReferencia);
         }
-        const compras = compradorId
-            ? this.obtenerComprasPorComprador(compradorId, fechaReferencia)
-            : this.compraRepository
-                  .findAll()
-                  .map((c) => this.enriquecerCompra(c, fechaReferencia));
+        let compras;
+        if (compradorId) {
+            compras = this.obtenerComprasPorComprador(compradorId, fechaReferencia);
+        } else if (organizadorId) {
+            compras = this.obtenerComprasPorOrganizador(
+                organizadorId,
+                soloConMensajes,
+                fechaReferencia
+            );
+        } else {
+            compras = this.compraRepository
+                .findAll()
+                .map((c) => this.enriquecerCompra(c, fechaReferencia));
+        }
 
         return this.paginarResultados(compras, page, limit);
+    }
+
+    obtenerComprasPorOrganizador(
+        organizadorId,
+        soloConMensajes = false,
+        fechaReferencia = new Date()
+    ) {
+        const organizador = this.usuarioRepository.findById(organizadorId);
+        if (!organizador) {
+            throw new EntidadNoEncontradaError("Organizador", organizadorId);
+        }
+        const filtrarMensajes = soloConMensajes === true || soloConMensajes === "true";
+
+        let compras = this.compraRepository
+            .findAll()
+            .filter((c) => c.evento?.organizador?.id === organizadorId)
+            .map((c) => this.enriquecerCompra(c, fechaReferencia));
+
+        if (filtrarMensajes) {
+            compras = compras.filter((c) => c.mensajes.length > 0);
+        }
+
+        // Ordenar primero las pendientes de respuesta y luego por fecha del último mensaje (más recientes primero)
+        compras.sort((a, b) => {
+            if (a.pendienteRespuestaOrganizador !== b.pendienteRespuestaOrganizador) {
+                return a.pendienteRespuestaOrganizador ? -1 : 1;
+            }
+            const fechaA = a.ultimoMensaje ? new Date(a.ultimoMensaje.enviado).getTime() : 0;
+            const fechaB = b.ultimoMensaje ? new Date(b.ultimoMensaje.enviado).getTime() : 0;
+            return fechaB - fechaA;
+        });
+
+        return compras;
     }
 
     obtenerMensajesPorCompra(compraId) {

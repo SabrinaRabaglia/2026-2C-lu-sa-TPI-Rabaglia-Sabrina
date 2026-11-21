@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { restaurarDatosSemilla } from '@/api/usuarios';
-import { URL_BASE_API } from '@/api/config';
 import { BotonPrimario } from '@/components/BotonPrimario';
 import { useSesion } from '@/context/SesionContext';
 import { obtenerNombreCompleto } from '@/lib/formato';
@@ -12,26 +9,8 @@ import { bordes, colores, espaciado, sombras, tipografia } from '@/tema';
 
 export function VistaPerfil() {
   const enrutador = useRouter();
-  const clienteQuery = useQueryClient();
   const { usuario, modo, cambiarModo, cerrarSesion } = useSesion();
   const [cambiandoModo, setCambiandoModo] = useState(false);
-
-  const mutacionRestaurar = useMutation({
-    mutationFn: restaurarDatosSemilla,
-    onSuccess: async () => {
-      await clienteQuery.invalidateQueries();
-      Alert.alert(
-        'Datos restaurados',
-        'La base de datos en memoria del backend volvió a su estado inicial de prueba.'
-      );
-    },
-    onError: (err) => {
-      Alert.alert(
-        'No se pudo restaurar',
-        err instanceof Error ? err.message : 'Error inesperado'
-      );
-    },
-  });
 
   const manejarCambioModo = async () => {
     setCambiandoModo(true);
@@ -62,11 +41,14 @@ export function VistaPerfil() {
           <Text style={estilos.textoAvatar}>{iniciales}</Text>
         </View>
         <Text style={estilos.nombre}>{obtenerNombreCompleto(usuario) || 'Usuario'}</Text>
+        {usuario?.email ? (
+          <Text style={estilos.email}>{usuario.email}</Text>
+        ) : null}
         <View style={estilos.pastillaRol}>
           <Ionicons
             name={modo === 'COMPRADOR' ? 'ticket-outline' : 'megaphone-outline'}
             size={16}
-            color={colores.primario}
+            color={colores.primarioTextoClaro}
           />
           <Text style={estilos.textoPastillaRol}>
             {modo === 'COMPRADOR' ? 'Modo Comprador' : 'Modo Organizador'}
@@ -88,17 +70,6 @@ export function VistaPerfil() {
           alPresionar={manejarCambioModo}
           cargando={cambiandoModo}
           variante="secundario"
-        />
-      </View>
-
-      <View style={estilos.tarjetaSeccion}>
-        <Text style={estilos.tituloSeccion}>Entorno de pruebas</Text>
-        <Text style={estilos.textoMeta}>Servidor conectado: {URL_BASE_API}</Text>
-        <BotonPrimario
-          etiqueta="Restaurar datos iniciales (Seed)"
-          alPresionar={() => mutacionRestaurar.mutate()}
-          cargando={mutacionRestaurar.isPending}
-          variante="fantasma"
         />
       </View>
 
@@ -141,12 +112,16 @@ const estilos = StyleSheet.create({
   textoAvatar: {
     fontSize: tipografia.lg,
     fontWeight: '700',
-    color: colores.primario,
+    color: colores.primarioTextoClaro,
   },
   nombre: {
     fontSize: tipografia.lg,
     fontWeight: '700',
     color: colores.texto,
+  },
+  email: {
+    fontSize: tipografia.sm,
+    color: colores.textoSecundario,
   },
   pastillaRol: {
     flexDirection: 'row',
@@ -156,11 +131,12 @@ const estilos = StyleSheet.create({
     paddingHorizontal: espaciado.md,
     paddingVertical: espaciado.xs,
     borderRadius: bordes.completo,
+    marginTop: espaciado.xs,
   },
   textoPastillaRol: {
     fontSize: tipografia.xs,
     fontWeight: '600',
-    color: colores.primario,
+    color: colores.primarioTextoClaro,
   },
   tarjetaSeccion: {
     backgroundColor: colores.superficie,
@@ -178,10 +154,6 @@ const estilos = StyleSheet.create({
     fontSize: tipografia.sm,
     color: colores.textoSecundario,
     lineHeight: 20,
-  },
-  textoMeta: {
-    fontSize: tipografia.xs,
-    color: colores.textoSecundario,
   },
   botonCerrarSesion: {
     marginTop: espaciado.xs,

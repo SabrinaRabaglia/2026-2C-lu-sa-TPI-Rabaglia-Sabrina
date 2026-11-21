@@ -100,7 +100,7 @@ const estilos = StyleSheet.create({
     color: colores.textoPrimario,
   },
   textoSecundario: {
-    color: colores.primario,
+    color: colores.primarioTextoClaro,
   },
   textoPeligro: {
     color: colores.textoPrimario,

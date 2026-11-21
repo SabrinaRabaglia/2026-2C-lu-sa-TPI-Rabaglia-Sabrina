@@ -438,8 +438,8 @@ export function seedDatabase(repos = defaultRepositories) {
             fecha: new Date(ahora + 15 * unDiaMs),
             tiposEntrada: [rockCampo, rockPlatea, rockVip],
             multimedia: [
-                "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=900&q=80",
-                "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=80"
+                "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=640&q=70&fm=webp",
+                "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=640&q=70&fm=webp"
             ],
             organizador: orgRock
         })
@@ -453,7 +453,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catTeatro,
             fecha: new Date(ahora + 7 * unDiaMs),
             tiposEntrada: [teatroGeneral, teatroFila1],
-            multimedia: ["https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgRock
         })
     );
@@ -466,7 +466,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catConferencias,
             fecha: new Date(ahora + 30 * unDiaMs),
             tiposEntrada: [confGeneral, confWorkshop],
-            multimedia: ["https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgTech
         })
     );
@@ -479,7 +479,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catRecitales,
             fecha: new Date(ahora - 20 * unDiaMs),
             tiposEntrada: [pasadoGeneral],
-            multimedia: ["https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgRock
         })
     );
@@ -492,7 +492,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catDeportes,
             fecha: new Date(ahora + 10 * unDiaMs),
             tiposEntrada: [tenisTribuna, tenisPalco],
-            multimedia: ["https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgDeportes
         })
     );
@@ -505,7 +505,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catRecitales,
             fecha: new Date(ahora + 5 * unDiaMs),
             tiposEntrada: [jazzBarra, jazzMesa],
-            multimedia: ["https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgRock
         })
     );
@@ -518,7 +518,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catFestivales,
             fecha: new Date(ahora + 22 * unDiaMs),
             tiposEntrada: [electroEarly, electroVip],
-            multimedia: ["https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgTech
         })
     );
@@ -531,7 +531,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catTeatro,
             fecha: new Date(ahora + 18 * unDiaMs),
             tiposEntrada: [hamletPlatea, hamletPalco],
-            multimedia: ["https://images.unsplash.com/photo-1503095396549-807759245b35?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1503095396549-807759245b35?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgRock
         })
     );
@@ -544,7 +544,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catGastronomia,
             fecha: new Date(ahora + 12 * unDiaMs),
             tiposEntrada: [feriaDia, feriaDegustacion],
-            multimedia: ["https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgTech
         })
     );
@@ -557,7 +557,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catDeportes,
             fecha: new Date(ahora + 1 * unDiaMs),
             tiposEntrada: [basquetPopularAgotada],
-            multimedia: ["https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgDeportes
         })
     );
@@ -570,7 +570,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catConferencias,
             fecha: new Date(ahora + 45 * unDiaMs),
             tiposEntrada: [cloudGeneral],
-            multimedia: ["https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgTech
         })
     );
@@ -583,7 +583,7 @@ export function seedDatabase(repos = defaultRepositories) {
             categoria: catDeportes,
             fecha: new Date(ahora - 10 * unDiaMs),
             tiposEntrada: [maratonGeneral],
-            multimedia: ["https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=900&q=80"],
+            multimedia: ["https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=640&q=70&fm=webp"],
             organizador: orgDeportes
         })
     );

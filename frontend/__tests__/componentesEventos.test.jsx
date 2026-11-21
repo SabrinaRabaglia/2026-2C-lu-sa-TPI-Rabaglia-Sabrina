@@ -35,14 +35,13 @@ describe('Componentes de Eventos y Compra', () => {
       );
 
       expect(screen.getByText('BA Rock Festival 2027')).toBeTruthy();
+      expect(screen.getByLabelText('Portada de BA Rock Festival 2027')).toBeTruthy();
       expect(screen.getByText('Recitales')).toBeTruthy();
       expect(screen.getByText('Martín Productor')).toBeTruthy();
       expect(screen.getByText('4.5 (2)')).toBeTruthy();
       expect(screen.queryByText('Agotado')).toBeNull();
 
-      await fireEvent.press(
-        screen.getByLabelText('Ver detalle de BA Rock Festival 2027')
-      );
+      await fireEvent.press(screen.getByText('BA Rock Festival 2027'));
       expect(alPresionar).toHaveBeenCalledTimes(1);
 
       await fireEvent.press(screen.getByLabelText('Agregar a favoritos'));
